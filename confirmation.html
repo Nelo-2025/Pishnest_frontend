@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking confirmed — Nearby</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <div class="nav-inner">
+            <a class="logo" href="index.html"><span class="dot"></span>Nearby</a>
+        </div>
+    </header>
+
+    <main class="page-container-narrow confirmation-shell">
+        <div class="confirmation-card text-center stack-md">
+        <h1>Booking confirmed</h1>
+        <p id="confirmation-detail">Thank you — your order has been confirmed.</p>
+        <div class="inline-actions">
+            <a href="dashboard.html" class="btn btn-primary">Go to dashboard</a>
+            <a href="index.html" class="btn btn-ghost">Browse more events</a>
+        </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="logo"><span class="dot"></span>Nearby</div>
+            <div class="footer-links">
+                <a href="browse.html">Browse</a>
+                <a href="my-bookings.html">Bookings</a>
+                <a href="terms.html">Terms</a>
+                <a href="privacy.html">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/common.js"></script>
+    <script>
+        const orderId = sessionStorage.getItem('last_order_id');
+        const total = sessionStorage.getItem('last_order_total');
+        if (orderId) {
+            document.getElementById('confirmation-detail').textContent =
+                `Order #${orderId} confirmed — total £${Number(total).toFixed(2)}. A summary would normally be emailed to you here.`;
+        }
+    </script>
+</body>
+</html>

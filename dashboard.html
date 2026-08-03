@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <div class="nav-inner">
+            <a class="logo" href="index.html"><span class="dot"></span>Nearby</a>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-ghost">Login</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-container-wide page-stack">
+    <h1>Welcome to Nearby</h1>
+    <p>This is the main landing page of the website.</p>
+
+    <section id="dashboard-shortcuts" class="page-card" aria-label="Dashboard shortcuts"></section>
+
+    <nav aria-label="Quick links">
+        <ul class="quick-links-list">
+            <li><a href="login.html">Login</a></li>
+            <li><a href="register.html">Register</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="event.html">Event</a></li>
+            <li><a href="browse.html">Browse</a></li>
+            <li><a href="organise.html">Organise</a></li>
+            <li><a href="my-bookings.html">My Bookings</a></li>
+            
+        </ul>
+    </nav>
+
+    <h2>About Us</h2>
+    <p>We are a platform that connects people with events happening
+        near them. Browse, register, and manage your events easily.
+    </p>
+
+    <h2>Contact</h2>
+    <p>If you have any questions, feel free to reach out to us at
+        <a href="mailto:support@nearby.com">support@nearby.com</a>.
+    </p>
+
+    <h2>Featured Events</h2>
+    <div class="event-list">
+        <p>Loading events…</p>
+    </div>
+
+    <!--
+      NOTE: the original page had a SECOND copy of this dialog's content
+      further down in a `.event-details` div, reusing the exact same ids
+      (event-name, event-location, event-time, event-price). HTML ids must
+      be unique — document.getElementById() only ever finds the first
+      match, so that second block was permanently dead/unreachable. It's
+      been removed rather than duplicated.
+    -->
+    <dialog id="event-dialog">
+        <h2>Event Details</h2>
+        <p id="event-name">Event Name: </p>
+        <p id="event-location">Location: </p>
+        <p id="event-time">Time: </p>
+        <p id="event-price">Price: </p>
+        <button id="close-dialog">Close</button>
+    </dialog>
+
+    <h2>Testimonials</h2>
+    <div class="testimonials">
+        <div class="testimonial">
+            <p>"This platform made it so easy to find events in my area. Highly recommend!"</p>
+            <p>- Jane Doe</p>
+        </div>
+        <div class="testimonial">
+            <p>"I love how I can manage my events and see what's happening nearby."</p>
+            <p>- John Smith</p>
+        </div>
+    </div>
+
+    <h2>Newsletter Signup</h2>
+    <form id="newsletter-form">
+        <label for="newsletter-email">Email:</label>
+        <input type="email" id="newsletter-email" name="newsletter-email" required>
+        <button type="submit">Subscribe</button>
+    </form>
+
+    <h2>Follow Us</h2>
+    <div class="social-media">
+        <a href="https://facebook.com/nearby" target="_blank">Facebook</a>
+        <a href="https://twitter.com/nearby" target="_blank">Twitter</a>
+        <a href="https://instagram.com/nearby" target="_blank">Instagram</a>
+    </div>
+    </main>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="logo"><span class="dot"></span>Nearby</div>
+            <div class="footer-links">
+                <a href="browse.html">Browse</a>
+                <a href="categories.html">Categories</a>
+                <a href="terms.html">Terms</a>
+                <a href="privacy.html">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+<script src="js/common.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

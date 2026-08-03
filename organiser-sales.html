@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organiser Sales</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <div class="nav-inner">
+            <a class="logo" href="index.html"><span class="dot"></span>Nearby</a>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-ghost">Login</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="index.html">Home</a> / <a href="dashboard.html">Dashboard</a> / <span>Sales and Attendees</span>
+    </div>
+
+    <main class="page-container-wide sales-shell">
+        <h1>Sales and Attendee Management</h1>
+        <p class="text-muted">View ticket sales performance and attendee bookings across your events.</p>
+
+        <section class="metric-grid" aria-label="Sales summary">
+            <article class="metric-card">
+                <h2>Total bookings</h2>
+                <p id="sales-total-bookings" class="metric-value">0</p>
+            </article>
+            <article class="metric-card">
+                <h2>Tickets sold</h2>
+                <p id="sales-total-tickets" class="metric-value">0</p>
+            </article>
+            <article class="metric-card">
+                <h2>Revenue</h2>
+                <p id="sales-total-revenue" class="metric-value">£0.00</p>
+            </article>
+        </section>
+
+        <section class="filter-card">
+            <label for="event-filter">Filter by event</label>
+            <select id="event-filter">
+                <option value="">All my events</option>
+            </select>
+        </section>
+
+        <div id="sales-message" class="form-notice"></div>
+
+        <section class="split-layout">
+            <article class="panel-card">
+                <h2>Event Performance</h2>
+                <div id="event-performance-list" class="record-list">
+                    <p>Loading event performance...</p>
+                </div>
+            </article>
+
+            <article class="panel-card">
+                <h2>Attendee Bookings</h2>
+                <div id="attendee-bookings-list" class="record-list">
+                    <p>Loading attendee bookings...</p>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="logo"><span class="dot"></span>Nearby</div>
+            <div class="footer-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="organise.html">Organise</a>
+                <a href="terms.html">Terms</a>
+                <a href="privacy.html">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/common.js"></script>
+    <script src="js/organiser-sales.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organise Events</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <div class="nav-inner">
+            <a class="logo" href="index.html"><span class="dot"></span>Nearby</a>
+            <div class="nav-actions">
+                <span id="organiser-welcome" class="hidden-inline"></span>
+                <a href="login.html" id="organiser-auth-link" class="btn btn-ghost">Log in</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="breadcrumb">
+        <a href="index.html">Home</a> / <span id="breadcrumb-title">Organise an Event</span>
+    </div>
+
+    <main id="page-content">
+        <h1>Organise an Event</h1>
+        <p>Fill out the form below to create your event.</p>
+
+        <form id="organise-form">
+            <label for="event-name">Event Name:</label>
+            <input type="text" id="event-name" name="event-name" required>
+
+            <label for="event-venue">Location:</label>
+            <input type="text" id="event-venue" name="event-venue" required>
+
+            <label for="event-startdatetime">Date:</label>
+            <input type="date" id="event-startdatetime" name="event-startdatetime" required>
+
+            <label for="event-enddatetime">Time:</label>
+            <input type="time" id="event-enddatetime" name="event-enddatetime" required>
+
+            <label for="event-description">Description:</label>
+            <textarea id="event-description" name="event-description" rows="4" cols="50"></textarea>
+
+            <label for="category-select">Category:</label>
+            <select id="category-select" name="category-select" required>
+                <option value="">Select a category</option>
+            </select>
+
+            <label class="checkline">
+                <input type="checkbox" id="save-to-return" name="save-to-return">
+                Save as draft (publish later)
+            </label>
+
+            <fieldset>
+                <legend>Ticket types (optional — you can add these later)</legend>
+                <div id="ticket-type-rows"></div>
+                <button type="button" id="add-ticket-type">+ Add ticket type</button>
+            </fieldset>
+            <button type="submit" id="organise-event">Create Event</button>
+        </form>
+
+        <section id="organiser-settings" class="border-top-soft page-stack">
+            <h2>Settings</h2>
+            <p class="text-muted">Update your organiser profile details here.</p>
+
+            <form id="organiser-settings-form" novalidate>
+                <label for="organiser-bio">Bio</label>
+                <textarea id="organiser-bio" name="organiser-bio" rows="4" cols="50" placeholder="Tell attendees about you and your events."></textarea>
+                <button type="submit" id="save-organiser-settings">Save Settings</button>
+            </form>
+            <div id="organiser-settings-message" class="notice hidden" role="status"></div>
+        </section>
+    </main>
+
+    <h2>Event Preview</h2>
+    <div id="event-preview">
+        <h3 id="preview-name">Event Name</h3>
+        <p id="preview-location">Location: </p>
+        <p id="preview-date">Date: </p>
+        <p id="preview-time">Time: </p>
+        <p id="preview-description">Description: </p>
+    </div>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="logo"><span class="dot"></span>Nearby</div>
+            <div class="footer-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="organiser-sales.html">Sales</a>
+                <a href="terms.html">Terms</a>
+                <a href="privacy.html">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/common.js"></script>
+    <script src="js/organise.js"></script>
+
+</body>
+</html>
