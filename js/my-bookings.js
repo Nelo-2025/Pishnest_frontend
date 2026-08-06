@@ -30,7 +30,7 @@ function renderBookings(orders) {
       <div class="empty-state">
         <h3>No bookings yet</h3>
         <p>You have not booked any tickets yet.</p>
-        <a class="btn btn-primary" href="browse.html">Browse events</a>
+        <a class="btn btn-primary" href="discover.html">Discover activities</a>
       </div>`;
     return;
   }
@@ -44,8 +44,8 @@ function renderBookings(orders) {
         <div class="record-head">
           <div>
             <h3>${order.event_title || 'Event'}</h3>
-            <p class="record-meta">📍 ${order.venue || 'Location TBC'}</p>
-            <p class="record-meta">🕒 ${formatDate(order.start_datetime)}</p>
+            <p class="record-meta">${icon('mapPin', 'icon icon-sm')} ${order.venue || 'Location TBC'}</p>
+            <p class="record-meta">${icon('clock', 'icon icon-sm')} ${formatDate(order.start_datetime)}</p>
           </div>
           <span class="status-pill">${status || 'unknown'}</span>
         </div>

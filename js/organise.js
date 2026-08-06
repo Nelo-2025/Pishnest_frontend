@@ -2,24 +2,73 @@
 
 function guardOrganiseAccess(currentUser) {
     const next = `organise.html${window.location.search || ''}`;
+    const gate = document.getElementById('dash-gate');
+    const app = document.getElementById('dash-app');
 
     if (!currentUser) {
+        if (gate) gate.hidden = false;
+        if (app) app.hidden = true;
+        document.body.classList.remove('is-dash-ready');
         window.location.href = `login.html?next=${encodeURIComponent(next)}`;
         return null;
     }
     if (!isOrganiserRole(currentUser)) {
-        const page = document.getElementById('page-content');
-        if (page) {
-            page.innerHTML = `
-                <h1>Access denied</h1>
-                <p>Only organiser accounts can create or edit events.</p>
-                <p>Redirecting to your dashboard...</p>
-            `;
+        if (gate) {
+            gate.hidden = false;
+            const copy = gate.querySelector('p');
+            const title = gate.querySelector('h1');
+            if (title) title.textContent = 'Organiser access needed';
+            if (copy) copy.textContent = 'Only organiser accounts can create or edit activities. Redirecting to your dashboard…';
         }
+        if (app) app.hidden = true;
+        document.body.classList.remove('is-dash-ready');
         window.setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
         return null;
     }
+
+    if (gate) gate.hidden = true;
+    if (app) app.hidden = false;
+    document.body.classList.add('is-dash-ready');
     return currentUser;
+}
+
+function fillOrganiseShell(user) {
+    const name = getUserDisplayName(user) || user.email || 'Organiser';
+    const nameEl = document.getElementById('dash-sidebar-name');
+    const emailEl = document.getElementById('dash-sidebar-email');
+    const roleEl = document.getElementById('dash-role-pill');
+    const avatar = document.getElementById('dash-avatar');
+    if (nameEl) nameEl.textContent = name;
+    if (emailEl) emailEl.textContent = user.email || '—';
+    if (roleEl) roleEl.textContent = normalizeRole(user.role) || 'organiser';
+    if (avatar) avatar.textContent = String(name).charAt(0).toUpperCase() || '?';
+
+    document.querySelectorAll('[data-nav-icon]').forEach((el) => {
+        el.innerHTML = icon(el.getAttribute('data-nav-icon'), 'icon icon-sm');
+    });
+
+    const logoutBtn = document.getElementById('dash-logout');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            await logout();
+            window.location.href = 'login.html?next=organise.html';
+        });
+    }
+
+    const toggle = document.getElementById('dash-sidebar-toggle');
+    const backdrop = document.getElementById('dash-backdrop');
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('dash-sidebar-open');
+            if (backdrop) backdrop.hidden = !document.body.classList.contains('dash-sidebar-open');
+        });
+    }
+    if (backdrop) {
+        backdrop.addEventListener('click', () => {
+            document.body.classList.remove('dash-sidebar-open');
+            backdrop.hidden = true;
+        });
+    }
 }
 
 function showNotice(msg, isError = false) {
@@ -36,11 +85,8 @@ function showNotice(msg, isError = false) {
 }
 
 function showSettingsNotice(message, isError = false) {
-    const el = document.getElementById('organiser-settings-message');
-    if (!el) return;
-    el.textContent = message;
-    el.classList.remove('hidden', 'success-box', 'notice');
-    el.classList.add(isError ? 'notice' : 'success-box');
+    // Legacy helper kept for compatibility; settings live on the dashboard now.
+    showNotice(message, isError);
 }
 
 function getBioStorageKey(user) {
@@ -48,19 +94,8 @@ function getBioStorageKey(user) {
     return `nearby_profile_bio_${idPart}`;
 }
 
-function wireOrganiserSettings(currentUser) {
-    const settingsForm = document.getElementById('organiser-settings-form');
-    const bioInput = document.getElementById('organiser-bio');
-    if (!settingsForm || !bioInput || !currentUser) return;
-
-    const bioKey = getBioStorageKey(currentUser);
-    bioInput.value = localStorage.getItem(bioKey) || '';
-
-    settingsForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        localStorage.setItem(bioKey, bioInput.value.trim());
-        showSettingsNotice('Settings saved successfully.');
-    });
+function wireOrganiserSettings() {
+    // Organiser profile settings moved to dashboard.html#settings.
 }
 
 function ensureOtherCategorySupport() {
@@ -333,7 +368,7 @@ async function handleSubmit(event) {
             setTimeout(() => { window.location.href = `event.html?id=${encodeURIComponent(targetId)}`; }, 900);
         } else {
             showNotice('Event saved successfully, but we could not open it automatically. Opening browse page...', false);
-            setTimeout(() => { window.location.href = 'browse.html'; }, 900);
+            setTimeout(() => { window.location.href = 'discover.html'; }, 900);
         }
     } else {
         showNotice((data && data.error) || "Could not save event.", true);
@@ -352,6 +387,7 @@ async function handleSubmit(event) {
     }
 
     if (!guardOrganiseAccess(currentUser)) return;
+    fillOrganiseShell(currentUser);
     wireOrganiserSettings(currentUser);
 
     const categories = await populateCategories(); // no chip row on this page, just fills the <select>
@@ -366,9 +402,15 @@ async function handleSubmit(event) {
     }
 
     if (editEventId) {
-        document.getElementById('breadcrumb-title').textContent = "Edit Event";
-        document.querySelector('main#page-content h1').textContent = "Edit Event";
-        document.getElementById('organise-event').textContent = "Save Changes";
+        const pageTitle = document.getElementById('organise-page-title');
+        const formHeading = document.getElementById('organise-form-heading');
+        const lead = document.getElementById('organise-page-lead');
+        const submitBtn = document.getElementById('organise-event');
+        if (pageTitle) pageTitle.textContent = 'Edit activity';
+        if (formHeading) formHeading.textContent = 'Update details';
+        if (lead) lead.textContent = 'Change the listing details, then save. Drafts stay private until you publish.';
+        if (submitBtn) submitBtn.textContent = 'Save changes';
+        document.title = 'Edit activity — Eventorg';
         await loadEventForEditing(editEventId);
     }
 

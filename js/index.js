@@ -1,32 +1,14 @@
 // Requires common.js loaded first (API_BASE, fetchJSON, getCurrentUser, etc.)
 
-function formatDateBadge(dateStr) {
-  const d = new Date(dateStr);
-  if (isNaN(d)) return { day: '--', month: '---' };
-  return { day: d.getDate(), month: d.toLocaleString('en-GB', { month: 'short' }).toUpperCase() };
-}
+const HOME_EVENT_LIMIT = 10;
 
-function eventCard(ev) {
-  const badge = formatDateBadge(ev.start_datetime);
-  const price = (ev.min_price === 0 || ev.min_price === null)
-    ? '<span class="amount free">Free</span>'
-    : `<span class="amount">£${Number(ev.min_price).toFixed(2)}</span>`;
-
-  return `
-    <a class="event-card" href="event.html?id=${ev.id}">
-      <div class="thumb">
-        <span class="category-tag">${ev.category_name || 'General'}</span>
-        <div class="date-badge"><strong>${badge.day}</strong>${badge.month}</div>
-      </div>
-      <div class="body">
-        <h3>${ev.title}</h3>
-        <div class="loc">📍 ${ev.venue || 'Location TBC'}</div>
-        <div class="foot">
-          <span class="from">from</span>
-          ${price}
-        </div>
-      </div>
-    </a>`;
+function sortEventsNewestFirst(events) {
+  return [...events].sort((a, b) => {
+    const aTime = new Date(a.start_datetime || 0).getTime();
+    const bTime = new Date(b.start_datetime || 0).getTime();
+    if (bTime !== aTime) return bTime - aTime;
+    return Number(b.id || 0) - Number(a.id || 0);
+  });
 }
 
 function renderSkeletons(container, count) {
@@ -43,11 +25,11 @@ function renderSkeletons(container, count) {
 async function loadEvents(params = {}) {
   const grid = document.getElementById('event-grid');
   if (!grid) return;
-  renderSkeletons(grid, 6);
+  renderSkeletons(grid, Math.min(HOME_EVENT_LIMIT, 6));
 
   const query = new URLSearchParams(params).toString();
   const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/events.php${query ? '?' + query : ''}`);
-  const events = (data && data.events) || [];
+  const events = sortEventsNewestFirst((data && data.events) || []).slice(0, HOME_EVENT_LIMIT);
 
   if (events.length === 0) {
     grid.innerHTML = `
@@ -55,35 +37,10 @@ async function loadEvents(params = {}) {
         <h3>No events found</h3>
         <p>Try a different search, or check back soon.</p>
       </div>`;
-    document.getElementById('stat-events').textContent = '0';
-    document.getElementById('stat-cities').textContent = '0';
     return;
   }
 
-  grid.innerHTML = events.map(eventCard).join('');
-  document.getElementById('stat-events').textContent = events.length;
-  const cities = new Set(events.map((e) => e.venue).filter(Boolean));
-  document.getElementById('stat-cities').textContent = cities.size;
-}
-
-function setupOrganiseLinkGuard() {
-  const organiseLink = document.getElementById('organise-link');
-  if (!organiseLink) return;
-
-  organiseLink.addEventListener('click', (event) => {
-    const currentUser = getCurrentUser();
-
-    if (!currentUser) {
-      event.preventDefault();
-      window.location.href = `login.html?next=${encodeURIComponent('organise.html')}`;
-      return;
-    }
-    if (!isOrganiserRole(currentUser)) {
-      event.preventDefault();
-      window.alert('Only organiser accounts can create events.');
-      window.location.href = 'dashboard.html';
-    }
-  });
+  grid.innerHTML = events.map(renderEventCard).join('');
 }
 
 document.getElementById('search-form').addEventListener('submit', (e) => {
@@ -95,7 +52,9 @@ document.getElementById('search-form').addEventListener('submit', (e) => {
 
 (async () => {
   await syncHeaderAuthUI();
-  await populateCategories((categoryId) => loadEvents({ category: categoryId }));
+  await populateCategories((categoryId) => {
+    const q = document.getElementById('search-input').value.trim();
+    loadEvents({ q, category: categoryId });
+  });
   loadEvents();
-  setupOrganiseLinkGuard();
 })();

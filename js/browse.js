@@ -20,7 +20,7 @@ function eventCard(ev) {
       </div>
       <div class="body">
         <h3>${ev.title}</h3>
-        <div class="loc">📍 ${ev.venue || 'Location TBC'}</div>
+        <div class="loc">${icon('mapPin', 'icon icon-sm')} ${ev.venue || 'Location TBC'}</div>
         <div class="foot"><span class="from">from</span>${price}</div>
       </div>
     </a>`;
@@ -31,6 +31,19 @@ async function loadEvents() {
   const urlParams = new URLSearchParams(window.location.search);
   const category = urlParams.get('category') || '';
   const q = urlParams.get('q') || '';
+  const section = (urlParams.get('section') || '').toLowerCase();
+
+  const titleEl = document.getElementById('browse-title');
+  const leadEl = document.getElementById('browse-lead');
+  if (section === 'kids') {
+    if (titleEl) titleEl.textContent = 'Kids activities';
+    if (leadEl) leadEl.textContent = 'Children’s activities and events — tagged for age, theme and family-friendly discovery.';
+    document.title = 'Kids activities — Eventorg';
+  } else if (section === 'general') {
+    if (titleEl) titleEl.textContent = 'General events';
+    if (leadEl) leadEl.textContent = 'The wider local calendar — markets, gigs, community events and more.';
+    document.title = 'General events — Eventorg';
+  }
 
   const query = new URLSearchParams({ ...(category && { category }), ...(q && { q }) }).toString();
   const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/events.php${query ? '?' + query : ''}`);
@@ -40,7 +53,7 @@ async function loadEvents() {
 
   grid.innerHTML = events.length
     ? events.map(eventCard).join('')
-    : `<div class="empty-state"><h3>No events found</h3><p>Try a different search, or check back soon.</p></div>`;
+    : `<div class="empty-state empty-state-full"><h3>No events found</h3><p>Try a different search, or check back soon.</p></div>`;
 }
 
 loadEvents();

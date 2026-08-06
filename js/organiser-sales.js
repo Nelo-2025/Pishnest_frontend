@@ -54,8 +54,8 @@ function renderEventPerformance(events) {
     return `
       <article class="record-card stack-sm">
         <h3>${ev.title}</h3>
-        <p class="record-meta">📍 ${ev.venue || 'Location TBC'}</p>
-        <p class="record-meta">🕒 ${formatDateTime(ev.start_datetime)}</p>
+        <p class="record-meta">${icon('mapPin', 'icon icon-sm')} ${ev.venue || 'Location TBC'}</p>
+        <p class="record-meta">${icon('clock', 'icon icon-sm')} ${formatDateTime(ev.start_datetime)}</p>
         <div class="metric-grid">
           <div class="metric-card">
             <h2>Bookings</h2>

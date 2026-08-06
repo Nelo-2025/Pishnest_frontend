@@ -1,5 +1,19 @@
 // Requires common.js loaded first.
 
+function fillCheckoutContactFields() {
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const nameInput = document.getElementById('name');
+  const emailInput = document.getElementById('email');
+  if (nameInput && !nameInput.value) {
+    nameInput.value = String(user.name || user.full_name || getUserDisplayName(user) || '').trim();
+  }
+  if (emailInput && !emailInput.value) {
+    emailInput.value = String(user.email || '').trim();
+  }
+}
+
 async function loadOrderSummary() {
   const summaryEl = document.getElementById('order-summary');
   const eventId = sessionStorage.getItem('checkout_event_id');
@@ -19,6 +33,19 @@ async function loadOrderSummary() {
   }
 
   const ev = data.event;
+
+  if (eventHasPassed(ev)) {
+    summaryEl.innerHTML = `
+      <h3 class="order-summary-title">${ev.title}</h3>
+      <p class="form-notice error" style="display:block">This event has already taken place. Tickets are no longer available.</p>
+      <p><a href="event.html?id=${encodeURIComponent(eventId)}">Back to event</a> · <a href="discover.html">Browse events</a></p>
+    `;
+    document.getElementById('checkout-submit').disabled = true;
+    sessionStorage.removeItem('checkout_event_id');
+    sessionStorage.removeItem('checkout_items');
+    return;
+  }
+
   let total = 0;
   const rows = items.map((item) => {
     const ticket = (ev.ticket_types || []).find((t) => String(t.id) === String(item.ticket_type_id));
@@ -30,7 +57,7 @@ async function loadOrderSummary() {
 
   summaryEl.innerHTML = `
     <h3 class="order-summary-title">${ev.title}</h3>
-    <p class="text-muted">📍 ${ev.venue || 'TBC'}</p>
+    <p class="text-muted">${icon('mapPin', 'icon icon-sm')} ${ev.venue || 'TBC'}</p>
     <div class="order-lines">${rows}</div>
     <p class="record-total">Total: £${total.toFixed(2)}</p>
   `;
@@ -49,8 +76,6 @@ document.getElementById('checkout-form').addEventListener('submit', async (event
   const eventId = sessionStorage.getItem('checkout_event_id');
   const items = JSON.parse(sessionStorage.getItem('checkout_items') || 'null');
 
-  // Validation happens BEFORE any network request now — the previous
-  // version fired the fetch first and only checked afterward.
   if (!eventId || !items || items.length === 0) {
     showCheckoutMessage('No items selected for checkout.', true);
     return;
@@ -68,6 +93,32 @@ document.getElementById('checkout-form').addEventListener('submit', async (event
   const submitBtn = document.getElementById('checkout-submit');
   submitBtn.disabled = true;
   submitBtn.textContent = 'Processing…';
+
+  // Frontend-only guards (no backend deploy needed).
+  const eventData = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/event.php?id=${encodeURIComponent(eventId)}`);
+  const ev = eventData && eventData.event;
+  if (!ev || eventHasPassed(ev)) {
+    showCheckoutMessage('This event has already taken place. Tickets are no longer available.', true);
+    sessionStorage.removeItem('checkout_event_id');
+    sessionStorage.removeItem('checkout_items');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Event has ended';
+    return;
+  }
+
+  const ticketTypes = ev.ticket_types || [];
+  const soldOutOrShort = items.some((item) => {
+    const ticket = ticketTypes.find((t) => String(t.id) === String(item.ticket_type_id));
+    if (!ticket) return true;
+    const remaining = Number(ticket.quantity_available) - Number(ticket.quantity_sold);
+    return remaining < Number(item.quantity);
+  });
+  if (soldOutOrShort) {
+    showCheckoutMessage('Sorry — those tickets are sold out or no longer available.', true);
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Confirm booking (demo — no payment taken)';
+    return;
+  }
 
   const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/checkout.php`, {
     method: 'POST',
@@ -91,5 +142,7 @@ document.getElementById('checkout-form').addEventListener('submit', async (event
 
 (async () => {
   await refreshCurrentUser();
+  fillCheckoutContactFields();
+  await syncHeaderAuthUI(getCurrentUser());
   loadOrderSummary();
 })();

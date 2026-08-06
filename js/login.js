@@ -8,15 +8,7 @@ function showMessage(elementId, message, isError = false) {
   element.classList.add(isError ? 'notice' : 'success-box');
 }
 
-document.querySelectorAll('[data-toggle-password]').forEach((button) => {
-  button.addEventListener('click', () => {
-    const input = document.getElementById(button.dataset.togglePassword);
-    if (!input) return;
-    const shouldReveal = input.type === 'password';
-    input.type = shouldReveal ? 'text' : 'password';
-    button.textContent = shouldReveal ? 'Hide' : 'Show';
-  });
-});
+// Password visibility toggles are handled in common.js (eye icons).
 
 function getPostLoginRedirect() {
   const params = new URLSearchParams(window.location.search);
@@ -28,15 +20,16 @@ function getPostLoginRedirect() {
 
   const [pathOnly] = next.split('?');
   const allowedPaths = new Set([
-    'dashboard.html', 'organise.html', 'index.html', 'browse.html',
-    'categories.html', 'event.html', 'checkout.html'
+    'dashboard.html', 'organise.html', 'index.html', 'browse.html', 'discover.html',
+    'categories.html', 'event.html', 'checkout.html', 'my-bookings.html',
+    'become-organiser.html', 'organiser-sales.html'
   ]);
   return allowedPaths.has(pathOnly) ? next : 'dashboard.html';
 }
 
 function getDefaultRoleRedirect(user) {
   const role = normalizeRole(user && user.role);
-  return (role === 'organiser' || role === 'admin') ? 'organise.html' : 'event.html';
+  return (role === 'organiser' || role === 'admin') ? 'dashboard.html' : 'dashboard.html';
 }
 
 const loginForm = document.getElementById('login-form');
@@ -68,10 +61,11 @@ if (loginForm) {
     });
 
     if (data && data.success && data.user) {
+      if (data.session_token) setSessionToken(data.session_token);
       setCurrentUser(data.user);
       showMessage('login-message', data.message || 'Login successful');
       loginForm.reset();
-      window.location.href = 'dashboard.html';
+      window.location.href = getPostLoginRedirect();
     } else {
       showMessage('login-message', (data && (data.message || data.error)) || 'Invalid email or password.', true);
     }

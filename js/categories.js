@@ -10,6 +10,6 @@
   }
 
   listEl.innerHTML = categories.map((cat) =>
-    `<li><a href="browse.html?category=${cat.id}">${cat.name}</a></li>`
+    `<li><a href="discover.html?category=${cat.id}">${cat.name}</a></li>`
   ).join('');
 })();

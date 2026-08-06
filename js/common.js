@@ -15,6 +15,88 @@
 // this cache only controls what buttons/links are shown, not what's
 // actually allowed.
 
+const ICON_PATHS = {
+  mapPin: '<path d="M12 21s-7-5.2-7-11a7 7 0 1 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  close: '<path d="M6 6l12 12M18 6 6 18"/>',
+  arrowRight: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  chart: '<path d="M4 19V5M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-3"/>',
+  message: '<path d="M21 12a8 8 0 0 1-8 8H5l-3 3V12a8 8 0 0 1 8-8h3a8 8 0 0 1 8 8z"/>',
+  ticket: '<path d="M3 9a2 2 0 0 0 2-2V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2v6a2 2 0 0 0-2 2v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2a2 2 0 0 0-2-2z"/><path d="M13 5v2M13 11v2M13 17v2"/>',
+  spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeOff: '<path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A10.5 10.5 0 0 1 12 5c6.5 0 10 7 10 7a17.4 17.4 0 0 1-3.2 4.1"/><path d="M6.1 6.1C3.7 7.8 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.4-1"/>'
+};
+
+function icon(name, className = 'icon') {
+  const paths = ICON_PATHS[name];
+  if (!paths) return '';
+  return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true">${paths}</svg>`;
+}
+
+function logoMarkHtml() {
+  return `<span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg></span>`;
+}
+
+function setupPasswordToggles() {
+  document.querySelectorAll('[data-toggle-password]').forEach((button) => {
+    if (button.dataset.toggleBound === 'true') return;
+    button.dataset.toggleBound = 'true';
+    button.type = 'button';
+    button.innerHTML = icon('eye', 'icon');
+    button.setAttribute('aria-label', 'Show password');
+
+    button.addEventListener('click', () => {
+      const input = document.getElementById(button.dataset.togglePassword);
+      if (!input) return;
+      const shouldReveal = input.type === 'password';
+      input.type = shouldReveal ? 'text' : 'password';
+      button.innerHTML = icon(shouldReveal ? 'eyeOff' : 'eye', 'icon');
+      button.setAttribute('aria-label', shouldReveal ? 'Hide password' : 'Show password');
+    });
+  });
+}
+
+function setupMobileNav() {
+  const header = document.querySelector('.site-header, header');
+  if (!header) return;
+
+  let toggle = header.querySelector('.nav-toggle');
+  const navInner = header.querySelector('.nav-inner');
+  if (!navInner) return;
+
+  if (!toggle) {
+    toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'nav-toggle';
+    const logo = navInner.querySelector('.logo');
+    if (logo && logo.nextSibling) {
+      navInner.insertBefore(toggle, logo.nextSibling);
+    } else {
+      navInner.appendChild(toggle);
+    }
+  }
+
+  toggle.setAttribute('aria-label', 'Open menu');
+  toggle.setAttribute('aria-expanded', 'false');
+  if (!toggle.innerHTML.trim()) {
+    toggle.innerHTML = icon('menu', 'icon');
+  }
+
+  toggle.addEventListener('click', () => {
+    const open = header.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    toggle.innerHTML = icon(open ? 'close' : 'menu', 'icon');
+  });
+}
+
 // Central backend URL used by all pages.
 const DEFAULT_API_BASE = 'https://darkgoldenrod-reindeer-637131.hostingersite.com/backend';
 const SAME_HOST_NO_PORT_API_BASE = DEFAULT_API_BASE;
@@ -64,20 +146,68 @@ function swapApiBase(url, fromBase, toBase) {
   return `${toBase}/${String(url).slice(fromPrefix.length)}`;
 }
 
-function getCurrentUser() {
+const USER_STORAGE_KEY = 'nearby_current_user';
+const SESSION_TOKEN_KEY = 'nearby_session_token';
+
+function readStoredUser(storage) {
   try {
-    return JSON.parse(sessionStorage.getItem('nearby_current_user'));
+    const raw = storage.getItem(USER_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
   } catch (err) {
     return null;
   }
 }
 
+function getSessionToken() {
+  try {
+    return localStorage.getItem(SESSION_TOKEN_KEY) || sessionStorage.getItem(SESSION_TOKEN_KEY) || '';
+  } catch (err) {
+    return '';
+  }
+}
+
+function setSessionToken(token) {
+  try {
+    if (token) {
+      localStorage.setItem(SESSION_TOKEN_KEY, String(token));
+    } else {
+      localStorage.removeItem(SESSION_TOKEN_KEY);
+    }
+    sessionStorage.removeItem(SESSION_TOKEN_KEY);
+  } catch (err) {
+    // Ignore storage failures (private mode, etc.).
+  }
+}
+
+function clearSessionToken() {
+  setSessionToken('');
+}
+
+function getCurrentUser() {
+  // Prefer localStorage so login survives tab closes / refreshes.
+  // Fall back to legacy sessionStorage and migrate if found.
+  const localUser = readStoredUser(localStorage);
+  if (localUser) return localUser;
+
+  const sessionUser = readStoredUser(sessionStorage);
+  if (sessionUser) {
+    setCurrentUser(sessionUser);
+    sessionStorage.removeItem(USER_STORAGE_KEY);
+    return sessionUser;
+  }
+  return null;
+}
+
 function setCurrentUser(user) {
-  sessionStorage.setItem('nearby_current_user', JSON.stringify(user));
+  const payload = JSON.stringify(user);
+  localStorage.setItem(USER_STORAGE_KEY, payload);
+  sessionStorage.removeItem(USER_STORAGE_KEY);
 }
 
 function clearCurrentUser() {
-  sessionStorage.removeItem('nearby_current_user');
+  localStorage.removeItem(USER_STORAGE_KEY);
+  sessionStorage.removeItem(USER_STORAGE_KEY);
+  clearSessionToken();
 }
 
 function normalizeRole(role) {
@@ -104,6 +234,139 @@ function getCurrentPagePath() {
   const pathname = String(window.location.pathname || '');
   const fileName = pathname.split('/').pop() || 'index.html';
   return `${fileName}${window.location.search || ''}`;
+}
+
+function getCurrentPageFile() {
+  const pathname = String(window.location.pathname || '');
+  return pathname.split('/').pop() || 'index.html';
+}
+
+const EVENT_IMAGE_MAP = {
+  music: 'assets/media/events/music.jpg',
+  sports: 'assets/media/events/sports.jpg',
+  sport: 'assets/media/events/sports.jpg',
+  art: 'assets/media/events/art.jpg',
+  food: 'assets/media/events/food.jpg',
+  festivals: 'assets/media/events/festival.jpg',
+  festival: 'assets/media/events/festival.jpg',
+  workshop: 'assets/media/events/workshop.jpg',
+  education: 'assets/media/events/education.jpg',
+  networking: 'assets/media/events/networking.jpg',
+  theatre: 'assets/media/events/theatre.jpg',
+  theater: 'assets/media/events/theatre.jpg',
+  technology: 'assets/media/events/tech.jpg',
+  tech: 'assets/media/events/tech.jpg',
+  kids: 'assets/media/events/kids.jpg',
+  general: 'assets/media/events/general.jpg'
+};
+
+const EVENT_IMAGE_FALLBACKS = [
+  'assets/media/events/general.jpg',
+  'assets/media/events/festival.jpg',
+  'assets/media/events/music.jpg',
+  'assets/media/events/workshop.jpg',
+  'assets/media/events/networking.jpg',
+  'assets/media/events/kids.jpg'
+];
+
+function getEventImageUrl(ev) {
+  const direct = ev && (ev.image_url || ev.cover_image || ev.image || ev.thumbnail || ev.photo);
+  if (direct) return String(direct);
+
+  const category = String((ev && (ev.category_name || ev.category)) || '').toLowerCase();
+  for (const [key, path] of Object.entries(EVENT_IMAGE_MAP)) {
+    if (category.includes(key)) return path;
+  }
+
+  const title = String((ev && ev.title) || '').toLowerCase();
+  if (/\b(kid|child|family|junior|school)\b/.test(title)) {
+    return EVENT_IMAGE_MAP.kids;
+  }
+
+  const id = Number((ev && ev.id) || 0);
+  return EVENT_IMAGE_FALLBACKS[Math.abs(id) % EVENT_IMAGE_FALLBACKS.length];
+}
+
+function formatDateBadge(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d)) return { day: '--', month: '---' };
+  return { day: d.getDate(), month: d.toLocaleString('en-GB', { month: 'short' }).toUpperCase() };
+}
+
+/** True when the event's end (or start) datetime is already in the past. */
+function eventHasPassed(ev) {
+  if (!ev) return false;
+  let cutoff = ev.end_datetime || ev.start_datetime || '';
+  if (!cutoff && ev.event_date) {
+    const time = (ev.event_time || '23:59:59').toString().slice(0, 8);
+    cutoff = `${ev.event_date} ${time}`;
+  }
+  if (!cutoff) return false;
+  const d = new Date(String(cutoff).replace(' ', 'T'));
+  return !isNaN(d.getTime()) && d.getTime() < Date.now();
+}
+
+function renderEventCard(ev) {
+  const badge = formatDateBadge(ev.start_datetime);
+  const price = (ev.min_price === 0 || ev.min_price === null)
+    ? '<span class="amount free">Free</span>'
+    : `<span class="amount">£${Number(ev.min_price).toFixed(2)}</span>`;
+  const imageUrl = getEventImageUrl(ev);
+
+  return `
+    <a class="event-card" href="event.html?id=${ev.id}">
+      <div class="thumb">
+        <img src="${imageUrl}" alt="" loading="lazy">
+        <span class="category-tag">${ev.category_name || 'General'}</span>
+        <div class="date-badge"><strong>${badge.day}</strong>${badge.month}</div>
+      </div>
+      <div class="body">
+        <h3>${ev.title}</h3>
+        <div class="loc">${icon('mapPin', 'icon icon-sm')} ${ev.venue || 'Location TBC'}</div>
+        <div class="foot">
+          <span class="from">from</span>
+          ${price}
+        </div>
+      </div>
+    </a>`;
+}
+
+function renderPrimaryNav() {
+  const nav = document.querySelector('.nav-links');
+  if (!nav) return;
+
+  const file = getCurrentPageFile().toLowerCase();
+  const params = new URLSearchParams(window.location.search);
+  const audience = (params.get('audience') || '').toLowerCase();
+
+  const discoverActive = (file === 'discover.html' || file === 'browse.html') && !audience;
+  const kidsActive = file === 'discover.html' && audience === 'kids';
+  const generalActive = file === 'discover.html' && audience === 'general';
+
+  nav.innerHTML = `
+    <a class="nav-link${discoverActive ? ' is-active' : ''}" href="discover.html"${discoverActive ? ' aria-current="page"' : ''}>Discover</a>
+    <a class="nav-link${kidsActive ? ' is-active' : ''}" href="discover.html?audience=kids"${kidsActive ? ' aria-current="page"' : ''}>Kids &amp; families</a>
+    <a class="nav-link${generalActive ? ' is-active' : ''}" href="discover.html?audience=general"${generalActive ? ' aria-current="page"' : ''}>General</a>
+  `;
+
+  ensureNavCluster();
+}
+
+function ensureNavCluster() {
+  const navInner = document.querySelector('header .nav-inner');
+  const navLinks = document.querySelector('header .nav-links');
+  const navActions = document.querySelector('header .nav-actions');
+  if (!navInner || !navLinks || !navActions) return;
+
+  let cluster = navInner.querySelector('.nav-cluster');
+  if (!cluster) {
+    cluster = document.createElement('div');
+    cluster.className = 'nav-cluster';
+    navInner.appendChild(cluster);
+  }
+
+  if (navLinks.parentElement !== cluster) cluster.appendChild(navLinks);
+  if (navActions.parentElement !== cluster) cluster.appendChild(navActions);
 }
 
 function ensureHeaderAuthElements() {
@@ -134,10 +397,12 @@ function ensureHeaderAuthElements() {
       || link.id === 'organiser-auth-link'
       || link.id === 'logout-link'
       || href.includes('login.html')
+      || href.includes('dashboard.html')
       || text === 'log in'
       || text === 'login'
       || text === 'log out'
       || text === 'logout'
+      || text === 'dashboard'
       || text === 'back to login';
   });
 
@@ -147,34 +412,84 @@ function ensureHeaderAuthElements() {
     navActions.appendChild(authLink);
   }
   authLink.setAttribute('data-header-auth', 'true');
+  authLink.classList.add('btn', 'btn-ghost');
 
-  const signUpLink = authLinkCandidates.find((link) => {
+  // Primary CTA: Become an Organiser (replaces Sign up / Get started)
+  let organiserCta = navActions.querySelector('[data-header-organiser-cta="true"]');
+  if (!organiserCta) {
+    organiserCta = authLinkCandidates.find((link) => {
+      const href = String(link.getAttribute('href') || '').toLowerCase();
+      const text = String(link.textContent || '').trim().toLowerCase();
+      return href.includes('become-organiser.html')
+        || href.includes('register.html')
+        || text === 'sign up'
+        || text === 'register'
+        || text === 'get started'
+        || text === 'become an organiser';
+    }) || null;
+  }
+
+  if (!organiserCta) {
+    organiserCta = document.createElement('a');
+    navActions.appendChild(organiserCta);
+  }
+
+  organiserCta.setAttribute('data-header-organiser-cta', 'true');
+  organiserCta.className = 'btn btn-primary';
+  organiserCta.textContent = 'Become an Organiser';
+  organiserCta.href = 'become-organiser.html';
+  organiserCta.style.display = '';
+
+  // Hide leftover Sign up / Get started links that aren't the CTA we just set
+  authLinkCandidates.forEach((link) => {
+    if (link === authLink || link === organiserCta) return;
     const href = String(link.getAttribute('href') || '').toLowerCase();
     const text = String(link.textContent || '').trim().toLowerCase();
-    return href.includes('register.html') || text === 'sign up' || text === 'register';
-  }) || null;
+    if (
+      href.includes('register.html')
+      || href.includes('#organiser-signup')
+      || text === 'sign up'
+      || text === 'get started'
+      || text === 'become an organiser'
+      || href.includes('my-bookings.html')
+    ) {
+      link.remove();
+    }
+  });
 
-  return { navActions, welcomeEl, authLink, signUpLink };
+  return { navActions, welcomeEl, authLink, organiserCta };
 }
 
 function renderHeaderAuthUI(currentUser) {
   const headerEls = ensureHeaderAuthElements();
   if (!headerEls) return;
 
-  const { welcomeEl, authLink, signUpLink } = headerEls;
+  const { welcomeEl, authLink, organiserCta } = headerEls;
+  const file = getCurrentPageFile().toLowerCase();
+
+  if (organiserCta) {
+    organiserCta.className = 'btn btn-primary';
+    organiserCta.textContent = 'Become an Organiser';
+    organiserCta.href = file === 'become-organiser.html' ? '#organiser-signup' : 'become-organiser.html';
+    organiserCta.style.color = '#fff';
+  }
 
   if (currentUser) {
-    welcomeEl.textContent = `Welcome, ${getUserDisplayName(currentUser)}!`;
-    welcomeEl.classList.remove('hidden-inline');
+    welcomeEl.textContent = '';
+    welcomeEl.classList.add('hidden-inline');
 
-    authLink.textContent = 'Logout';
-    authLink.href = '#';
-    authLink.onclick = async (event) => {
-      event.preventDefault();
-      await logout();
-    };
+    authLink.textContent = 'Dashboard';
+    authLink.href = 'dashboard.html';
+    authLink.onclick = null;
 
-    if (signUpLink) signUpLink.style.display = 'none';
+    if (organiserCta) {
+      if (isOrganiserRole(currentUser)) {
+        organiserCta.textContent = 'List an activity';
+        organiserCta.href = 'organise.html';
+        // Prefer dashboard as the main organiser home from header Dashboard link.
+      }
+      organiserCta.style.display = '';
+    }
     return;
   }
 
@@ -185,7 +500,7 @@ function renderHeaderAuthUI(currentUser) {
   authLink.href = `login.html?next=${encodeURIComponent(getCurrentPagePath())}`;
   authLink.onclick = null;
 
-  if (signUpLink) signUpLink.style.display = '';
+  if (organiserCta) organiserCta.style.display = '';
 }
 
 let headerAuthSyncPromise = null;
@@ -198,14 +513,21 @@ async function syncHeaderAuthUI(initialUser) {
   }
 
   const serverUser = await headerAuthSyncPromise;
-  renderHeaderAuthUI(serverUser);
-  return serverUser;
+  const resolvedUser = serverUser || getCurrentUser();
+  renderHeaderAuthUI(resolvedUser);
+  return resolvedUser;
 }
 
 async function fetchJSON(url, options) {
+  const sessionToken = getSessionToken();
+
   const requestOptions = {
     credentials: 'include',
-    ...(options || {})
+    ...(options || {}),
+    headers: {
+      ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
+      ...((options && options.headers) || {})
+    }
   };
 
   const candidates = buildApiBaseCandidates();
@@ -263,13 +585,18 @@ async function fetchJSON(url, options) {
 // Call this on page load for pages that need to know the current auth
 // state reliably (dashboard, organise, event pages).
 async function refreshCurrentUser() {
+  const cachedUser = getCurrentUser();
   const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/me.php`);
+
   if (data && data.success && data.user) {
     setCurrentUser(data.user);
     return data.user;
   }
-  clearCurrentUser();
-  return null;
+
+  // Do not clear the cache here. Cross-origin cookie blocks and brief API
+  // blips would otherwise log people out on every page load. Only logout()
+  // clears the cached user; protected API calls still enforce the real session.
+  return cachedUser;
 }
 
 async function logout() {
@@ -278,55 +605,126 @@ async function logout() {
   window.location.href = 'index.html';
 }
 
-// Populates any <select> with id="category-select" and any chip row with
-// id="category-chips" from the real categories.php endpoint. Calls
-// onSelect(categoryId) when a chip is clicked, so the caller can trigger
-// its own event reload.
+// Searchable category dropdown used on homepage / discover.
+// Markup: .category-combo[data-category-combo] with hidden input, trigger, panel, search, list.
+function setupCategoryCombo(root, categories, { onSelect, initialValue = '' } = {}) {
+  if (!root) return;
+
+  const hidden = root.querySelector('input[type="hidden"]');
+  const trigger = root.querySelector('.category-combo-trigger');
+  const label = root.querySelector('.category-combo-label');
+  const panel = root.querySelector('.category-combo-panel');
+  const search = root.querySelector('.category-combo-search');
+  const list = root.querySelector('.category-combo-list');
+  if (!hidden || !trigger || !label || !panel || !search || !list) return;
+
+  const options = [{ id: '', name: 'All categories' }, ...categories];
+
+  function setValue(id, silent = false) {
+    const match = options.find((opt) => String(opt.id) === String(id)) || options[0];
+    hidden.value = match.id === '' || match.id == null ? '' : String(match.id);
+    label.textContent = match.name;
+    list.querySelectorAll('[role="option"]').forEach((el) => {
+      el.setAttribute('aria-selected', String(el.dataset.value) === String(hidden.value) ? 'true' : 'false');
+    });
+    if (!silent) {
+      hidden.dispatchEvent(new Event('change', { bubbles: true }));
+      if (typeof onSelect === 'function') onSelect(hidden.value);
+    }
+  }
+
+  function renderList(filterText = '') {
+    const q = String(filterText || '').trim().toLowerCase();
+    const filtered = options.filter((opt) => !q || String(opt.name).toLowerCase().includes(q));
+    list.innerHTML = filtered.length
+      ? filtered.map((opt) => {
+          const value = opt.id === '' || opt.id == null ? '' : String(opt.id);
+          const selected = value === String(hidden.value);
+          return `<li role="option" tabindex="-1" data-value="${value}" aria-selected="${selected ? 'true' : 'false'}">${opt.name}</li>`;
+        }).join('')
+      : '<li class="category-combo-empty">No categories found</li>';
+  }
+
+  function openPanel() {
+    panel.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+    root.classList.add('is-open');
+    search.value = '';
+    renderList('');
+    search.focus();
+  }
+
+  function closePanel() {
+    panel.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    root.classList.remove('is-open');
+  }
+
+  trigger.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (panel.hidden) openPanel();
+    else closePanel();
+  });
+
+  search.addEventListener('input', () => renderList(search.value));
+  search.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') event.preventDefault();
+    if (event.key === 'Escape') {
+      closePanel();
+      trigger.focus();
+    }
+  });
+
+  list.addEventListener('click', (event) => {
+    const option = event.target.closest('[role="option"][data-value]');
+    if (!option) return;
+    setValue(option.dataset.value);
+    closePanel();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!root.contains(event.target)) closePanel();
+  });
+
+  renderList('');
+  setValue(initialValue, true);
+}
+
+// Populates category <select id="category-select"> (organise form) and any
+// searchable [data-category-combo] dropdowns. Calls onSelect(categoryId)
+// when a combo option is chosen.
 async function populateCategories(onSelect) {
   const rawCategories = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/categories.php`);
   const categories = Array.isArray(rawCategories)
     ? rawCategories
     : ((rawCategories && Array.isArray(rawCategories.categories)) ? rawCategories.categories : []);
   const select = document.getElementById('category-select');
-  const chipRow = document.getElementById('category-chips');
 
   if (!Array.isArray(categories) || categories.length === 0) return [];
 
-  categories.forEach((cat) => {
-    if (select) {
+  if (select && select.tagName === 'SELECT') {
+    categories.forEach((cat) => {
       const opt = document.createElement('option');
       opt.value = cat.id;
       opt.textContent = cat.name;
       select.appendChild(opt);
-    }
-
-    if (chipRow) {
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'chip';
-      chip.dataset.category = cat.id;
-      chip.textContent = cat.name;
-      chip.addEventListener('click', () => {
-        chipRow.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
-        chip.classList.add('active');
-        if (onSelect) onSelect(cat.id);
-      });
-      chipRow.appendChild(chip);
-    }
-  });
-
-  const allChip = chipRow && chipRow.querySelector('.chip[data-category=""]');
-  if (allChip) {
-    allChip.addEventListener('click', (e) => {
-      chipRow.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
-      e.target.classList.add('active');
-      if (onSelect) onSelect('');
     });
   }
+
+  document.querySelectorAll('[data-category-combo]').forEach((root) => {
+    const hidden = root.querySelector('input[type="hidden"]');
+    setupCategoryCombo(root, categories, {
+      onSelect,
+      initialValue: hidden ? hidden.value : ''
+    });
+  });
 
   return categories;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  syncHeaderAuthUI();
+  renderPrimaryNav();
+  setupMobileNav();
+  setupPasswordToggles();
+  syncHeaderAuthUI().finally(() => ensureNavCluster());
 });

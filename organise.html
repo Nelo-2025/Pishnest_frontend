@@ -1,101 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organise Events</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create activity — Eventorg</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/motion.css">
 </head>
-<body>
+<body class="dash-page is-dash-ready">
 
-    <header>
-        <div class="nav-inner">
-            <a class="logo" href="index.html"><span class="dot"></span>Nearby</a>
-            <div class="nav-actions">
-                <span id="organiser-welcome" class="hidden-inline"></span>
-                <a href="login.html" id="organiser-auth-link" class="btn btn-ghost">Log in</a>
-            </div>
+<div id="dash-gate" class="dash-gate" hidden>
+  <div class="dash-gate-card">
+    <a class="logo dash-gate-logo" href="index.html">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+      </span>
+      Eventorg
+    </a>
+    <h1>Organiser access needed</h1>
+    <p>Sign in with an organiser account to create and manage activities.</p>
+    <div class="button-row">
+      <a href="login.html?next=organise.html" class="btn btn-primary">Log in</a>
+      <a href="become-organiser.html#organiser-signup" class="btn btn-ghost">Become an organiser</a>
+    </div>
+  </div>
+</div>
+
+<div id="dash-app" class="dash-app" hidden>
+  <aside class="dash-sidebar" id="dash-sidebar" aria-label="Organiser dashboard">
+    <div class="dash-sidebar-top">
+      <a class="logo dash-sidebar-logo" href="index.html">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+        </span>
+        Eventorg
+      </a>
+
+      <div class="dash-user-card">
+        <div class="dash-avatar" id="dash-avatar" aria-hidden="true">?</div>
+        <div class="dash-user-copy">
+          <strong id="dash-sidebar-name">Organiser</strong>
+          <span id="dash-sidebar-email" class="dash-user-email">—</span>
+          <span class="dash-plan-pill" id="dash-role-pill">organiser</span>
         </div>
-    </header>
+      </div>
 
-    <div class="breadcrumb">
-        <a href="index.html">Home</a> / <span id="breadcrumb-title">Organise an Event</span>
+      <nav class="dash-side-nav" aria-label="Organiser sections">
+        <a class="dash-nav-item" href="dashboard.html#overview"><span class="dash-nav-ico" data-nav-icon="chart"></span>Overview</a>
+        <a class="dash-nav-item" href="dashboard.html#bookings"><span class="dash-nav-ico" data-nav-icon="ticket"></span>Bookings</a>
+        <a class="dash-nav-item" href="dashboard.html#activities"><span class="dash-nav-ico" data-nav-icon="calendar"></span>Activities</a>
+        <a class="dash-nav-item is-active" href="organise.html" aria-current="page"><span class="dash-nav-ico" data-nav-icon="spark"></span>Create</a>
+        <a class="dash-nav-item" href="dashboard.html#sales"><span class="dash-nav-ico" data-nav-icon="chart"></span>Sales</a>
+        <a class="dash-nav-item" href="dashboard.html#discover"><span class="dash-nav-ico" data-nav-icon="search"></span>Discover</a>
+        <a class="dash-nav-item" href="dashboard.html#settings"><span class="dash-nav-ico" data-nav-icon="settings"></span>Settings</a>
+      </nav>
     </div>
 
-    <main id="page-content">
-        <h1>Organise an Event</h1>
-        <p>Fill out the form below to create your event.</p>
+    <div class="dash-sidebar-foot">
+      <a href="dashboard.html#activities" class="btn btn-primary dash-side-cta">My activities</a>
+      <button type="button" class="btn btn-ghost dash-logout-btn" id="dash-logout">Log out</button>
+    </div>
+  </aside>
 
-        <form id="organise-form">
-            <label for="event-name">Event Name:</label>
-            <input type="text" id="event-name" name="event-name" required>
+  <div class="dash-backdrop" id="dash-backdrop" hidden></div>
 
-            <label for="event-venue">Location:</label>
-            <input type="text" id="event-venue" name="event-venue" required>
+  <div class="dash-main">
+    <div class="dash-mobile-bar">
+      <button type="button" class="dash-menu-btn" id="dash-sidebar-toggle" aria-label="Open menu">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <a class="logo" href="index.html">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+        </span>
+        Eventorg
+      </a>
+    </div>
 
-            <label for="event-startdatetime">Date:</label>
-            <input type="date" id="event-startdatetime" name="event-startdatetime" required>
+    <div class="dash-main-scroll">
+      <header class="dash-page-head">
+        <p class="dash-eyebrow">Organiser</p>
+        <h1 id="organise-page-title">Create an activity</h1>
+        <p class="dash-lead" id="organise-page-lead">Set up in around two minutes — clear fields, optional tickets, publish when ready.</p>
+      </header>
 
-            <label for="event-enddatetime">Time:</label>
-            <input type="time" id="event-enddatetime" name="event-enddatetime" required>
+      <div id="page-content" class="organise-workspace">
+        <article class="dash-card organise-form-card">
+          <div class="dash-card-head">
+            <h2 id="organise-form-heading">Activity details</h2>
+          </div>
 
-            <label for="event-description">Description:</label>
-            <textarea id="event-description" name="event-description" rows="4" cols="50"></textarea>
+          <form id="organise-form" class="organise-form">
+            <div class="organise-form-grid">
+              <div class="dash-field">
+                <label for="event-name">Event name</label>
+                <input type="text" id="event-name" name="event-name" required placeholder="e.g. Saturday Forest School">
+              </div>
 
-            <label for="category-select">Category:</label>
-            <select id="category-select" name="category-select" required>
-                <option value="">Select a category</option>
-            </select>
+              <div class="dash-field">
+                <label for="event-venue">Location</label>
+                <input type="text" id="event-venue" name="event-venue" required placeholder="Venue or area">
+              </div>
 
-            <label class="checkline">
-                <input type="checkbox" id="save-to-return" name="save-to-return">
-                Save as draft (publish later)
+              <div class="dash-field">
+                <label for="event-startdatetime">Date</label>
+                <input type="date" id="event-startdatetime" name="event-startdatetime" required>
+              </div>
+
+              <div class="dash-field">
+                <label for="event-enddatetime">Time</label>
+                <input type="time" id="event-enddatetime" name="event-enddatetime" required>
+              </div>
+
+              <div class="dash-field organise-field-span">
+                <label for="category-select">Category</label>
+                <select id="category-select" name="category-select" required>
+                  <option value="">Select a category</option>
+                </select>
+              </div>
+
+              <div class="dash-field organise-field-span">
+                <label for="event-description">Description</label>
+                <textarea id="event-description" name="event-description" rows="5" placeholder="What happens, who it’s for, what to bring…"></textarea>
+              </div>
+            </div>
+
+            <label class="organise-draft-check" for="save-to-return">
+              <input type="checkbox" id="save-to-return" name="save-to-return">
+              <span class="organise-draft-copy">
+                <strong>Save as draft</strong>
+                <small>Publish later when you are ready</small>
+              </span>
             </label>
 
-            <fieldset>
-                <legend>Ticket types (optional — you can add these later)</legend>
-                <div id="ticket-type-rows"></div>
-                <button type="button" id="add-ticket-type">+ Add ticket type</button>
+            <fieldset class="organise-tickets">
+              <legend>Ticket types <span class="text-muted">(optional)</span></legend>
+              <div id="ticket-type-rows"></div>
+              <button type="button" id="add-ticket-type" class="btn btn-ghost">+ Add ticket type</button>
             </fieldset>
-            <button type="submit" id="organise-event">Create Event</button>
-        </form>
 
-        <section id="organiser-settings" class="border-top-soft page-stack">
-            <h2>Settings</h2>
-            <p class="text-muted">Update your organiser profile details here.</p>
-
-            <form id="organiser-settings-form" novalidate>
-                <label for="organiser-bio">Bio</label>
-                <textarea id="organiser-bio" name="organiser-bio" rows="4" cols="50" placeholder="Tell attendees about you and your events."></textarea>
-                <button type="submit" id="save-organiser-settings">Save Settings</button>
-            </form>
-            <div id="organiser-settings-message" class="notice hidden" role="status"></div>
-        </section>
-    </main>
-
-    <h2>Event Preview</h2>
-    <div id="event-preview">
-        <h3 id="preview-name">Event Name</h3>
-        <p id="preview-location">Location: </p>
-        <p id="preview-date">Date: </p>
-        <p id="preview-time">Time: </p>
-        <p id="preview-description">Description: </p>
-    </div>
-
-    <footer>
-        <div class="footer-inner">
-            <div class="logo"><span class="dot"></span>Nearby</div>
-            <div class="footer-links">
-                <a href="dashboard.html">Dashboard</a>
-                <a href="organiser-sales.html">Sales</a>
-                <a href="terms.html">Terms</a>
-                <a href="privacy.html">Privacy</a>
+            <div class="organise-form-actions">
+              <a href="dashboard.html#activities" class="btn btn-ghost">Cancel</a>
+              <button type="submit" id="organise-event" class="btn btn-primary">Create activity</button>
             </div>
-        </div>
-    </footer>
+          </form>
+        </article>
 
-    <script src="js/common.js"></script>
-    <script src="js/organise.js"></script>
+        <aside class="dash-card organise-preview-card">
+          <div class="dash-card-head">
+            <h2>Live preview</h2>
+          </div>
+          <div id="event-preview" class="organise-preview">
+            <h3 id="preview-name">Event name</h3>
+            <p id="preview-location" class="record-meta">Location: —</p>
+            <p id="preview-date" class="record-meta">Date: —</p>
+            <p id="preview-time" class="record-meta">Time: —</p>
+            <p id="preview-description" class="organise-preview-desc">Description will appear here.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
 
+<script src="js/common.js"></script>
+<script src="js/motion.js"></script>
+<script src="js/organise.js"></script>
 </body>
 </html>

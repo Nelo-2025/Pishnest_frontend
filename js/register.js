@@ -6,15 +6,7 @@ function showMessage(elementId, message, isError = false) {
   element.classList.add(isError ? 'notice' : 'success-box');
 }
 
-document.querySelectorAll('[data-toggle-password]').forEach((button) => {
-  button.addEventListener('click', () => {
-    const input = document.getElementById(button.dataset.togglePassword);
-    if (!input) return;
-    const shouldReveal = input.type === 'password';
-    input.type = shouldReveal ? 'text' : 'password';
-    button.textContent = shouldReveal ? 'Hide' : 'Show';
-  });
-});
+// Password visibility toggles are handled in common.js (eye icons).
 
 const registerForm = document.getElementById('register-form');
 if (registerForm) {
@@ -25,7 +17,10 @@ if (registerForm) {
     const email = document.getElementById('email').value.trim().toLowerCase();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
-    const role = document.getElementById('role').value;
+    const roleInput = document.getElementById('role');
+    const role = roleInput
+      ? roleInput.value
+      : 'attendee';
 
     if (!name || !email || !password || !confirmPassword || !role) {
       showMessage('register-message', 'Please fill in all fields.', true);
@@ -53,7 +48,8 @@ if (registerForm) {
     if (data && data.success) {
       showMessage('register-message', data.message || 'Account created! You can now log in.');
       registerForm.reset();
-      window.location.href = 'login.html';
+      const next = role === 'organiser' ? 'login.html?next=dashboard.html' : 'login.html';
+      window.location.href = next;
     } else {
       showMessage('register-message', (data && (data.message || data.error)) || 'Could not register.', true);
     }
