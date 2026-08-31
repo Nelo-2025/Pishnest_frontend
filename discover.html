@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover — Eventorg</title>
+  <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/motion.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="nav-inner">
+    <a class="logo" href="index.html">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+      </span>
+      Eventorg
+    </a>
+    <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
+    <nav class="nav-links" aria-label="Primary"></nav>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost">Log in</a>
+      <a href="register.html" class="btn btn-primary">Sign up</a>
+    </div>
+  </div>
+</header>
+
+<main class="page-container-wide page-stack">
+  <div class="page-intro">
+    <h1>Discover</h1>
+    <p>Find kids activities and community events across Colchester — filter by audience, category and date.</p>
+  </div>
+
+  <form class="discover-filters" id="discover-filters">
+    <div class="filter-field filter-search">
+      <label for="discover-q">Search</label>
+      <input type="search" id="discover-q" name="q" placeholder="Search activities…">
+    </div>
+
+    <div class="filter-field">
+      <label for="discover-audience">Audience</label>
+      <select id="discover-audience" name="audience">
+        <option value="">All audiences</option>
+        <option value="kids">Kids &amp; families</option>
+        <option value="general">General</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label id="discover-category-label">Category</label>
+      <div class="category-combo category-combo-block" data-category-combo>
+        <input type="hidden" id="discover-category" name="category" value="">
+        <button type="button" class="category-combo-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="discover-category-label">
+          <span class="category-combo-label">All categories</span>
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="category-combo-panel" hidden>
+          <input type="search" class="category-combo-search" placeholder="Search categories…" aria-label="Search categories">
+          <ul class="category-combo-list" role="listbox"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-field">
+      <label for="discover-date">Event date</label>
+      <input type="date" id="discover-date" name="date">
+    </div>
+
+    <div class="filter-actions">
+      <button type="submit" class="btn btn-blue">Apply filters</button>
+      <button type="button" class="btn btn-ghost" id="discover-reset">Reset</button>
+    </div>
+  </form>
+
+  <div class="section-head discover-results-head">
+    <p id="discover-count" class="text-muted">Loading activities…</p>
+  </div>
+
+  <div class="grid" id="event-grid">
+    <p>Loading events…</p>
+  </div>
+
+  <nav id="discover-pagination" class="pagination hidden" aria-label="Discover pagination"></nav>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a class="logo" href="index.html">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+        </span>
+        Eventorg
+      </a>
+      <p>Connecting activity organisers and families — with marketplace-level insight no single booking tool can generate alone.</p>
+    </div>
+    <div class="footer-col">
+      <h3>Discover</h3>
+      <a href="discover.html?audience=kids">Kids &amp; families</a>
+      <a href="discover.html?audience=general">General</a>
+      <a href="discover.html">All activities</a>
+      <a href="categories.html">Categories</a>
+    </div>
+    <div class="footer-col">
+      <h3>Organisers</h3>
+      <a href="organise.html">Create an activity</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="organiser-sales.html">Sales</a>
+      <a href="become-organiser.html">Become an organiser</a>
+    </div>
+    <div class="footer-col">
+      <h3>Account</h3>
+      <a href="my-bookings.html">My bookings</a>
+      <a href="login.html">Log in</a>
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Eventorg</span>
+    <span>Pilot city: Colchester</span>
+  </div>
+</footer>
+
+<script src="js/common.js"></script>
+<script src="js/motion.js"></script>
+<script src="js/discover.js"></script>
+</body>
+</html>

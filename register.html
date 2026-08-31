@@ -5,23 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Account</title>
     <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/motion.css">
 </head>
 <body>
 
-            <header>
-                <div class="nav-inner">
-                    <a class="logo" href="index.html"><span class="dot"></span>Nearby</a>
-                    <div class="nav-actions">
-                        <a href="login.html" class="btn btn-ghost">Log in</a>
-                    </div>
-                </div>
-            </header>
+            <header class="site-header">
+  <div class="nav-inner">
+    <a class="logo" href="index.html">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+      </span>
+      Eventorg
+    </a>
+    <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="discover.html?audience=kids">Kids</a>
+      <a href="discover.html?audience=general">General</a>
+      <a href="categories.html">Categories</a>
+      <a href="organise.html" id="organise-link">For organisers</a>
+      <a href="my-bookings.html">Bookings</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost">Log in</a>
+      <a href="register.html" class="btn btn-primary">Sign up</a>
+    </div>
+  </div>
+</header>
 
             <main class="auth-shell">
                 <h1>Create Account</h1>
-                <p>Set up your account with a valid email address.</p>
+                <p>Sign up as a family or attendee to discover and book activities.</p>
 
                 <form id="register-form" novalidate>
+                    <input type="hidden" id="role" name="role" value="attendee">
+
                     <label for="name">Full Name</label>
                     <input type="text" id="name" name="name" autocomplete="name" required>
 
@@ -31,54 +48,66 @@
                     <label for="password">Password</label>
                     <div class="password-field">
                         <input type="password" id="password" name="password" autocomplete="new-password" required>
-                        <button type="button" class="password-toggle" data-toggle-password="password">Show</button>
+                        <button type="button" class="password-toggle" data-toggle-password="password" aria-label="Show password"></button>
                     </div>
 
                     <label for="confirm-password">Confirm Password</label>
                     <div class="password-field">
                         <input type="password" id="confirm-password" name="confirm-password" autocomplete="new-password" required>
-                        <button type="button" class="password-toggle" data-toggle-password="confirm-password">Show</button>
+                        <button type="button" class="password-toggle" data-toggle-password="confirm-password" aria-label="Show password"></button>
                     </div>
 
-                    <label for="role">I am registering as</label>
-                    <!--
-                      SECURITY FIX: the original version had an "Admin"
-                      option here, and register.php trusted whatever value
-                      the client sent — meaning anyone could self-register
-                      as an administrator. Public sign-up can only ever
-                      create an Attendee or Organiser account; admin
-                      accounts should only ever be created/promoted
-                      manually (e.g. directly in phpMyAdmin), never through
-                      this public form. register.php also independently
-                      whitelists this value server-side, so even editing
-                      this dropdown in devtools won't grant admin.
-                    -->
-                    <select id="role" name="role" required>
-                        <option value="">Select a role</option>
-                        <option value="attendee">Attendee</option>
-                        <option value="organiser">Organiser</option>
-                    </select>
-
-                    <button type="submit">Register</button>
+                    <button type="submit">Sign up</button>
                     <div id="register-message" class="notice hidden" role="status"></div>
                 </form>
 
                 <div class="auth-footer">
                     Already have an account? <a href="login.html">Log in here</a>.
+                    Want to list activities? <a href="become-organiser.html#organiser-signup">Become an Organiser</a>.
                 </div>
             </main>
 
-            <footer>
-                <div class="footer-inner">
-                    <div class="logo"><span class="dot"></span>Nearby</div>
-                    <div class="footer-links">
-                        <a href="terms.html">Terms</a>
-                        <a href="privacy.html">Privacy</a>
-                    </div>
-                </div>
-            </footer>
+            <footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a class="logo" href="index.html">
+        <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+      </span>
+        Eventorg
+      </a>
+      <p>Connecting activity organisers and families — with marketplace-level insight no single booking tool can generate alone.</p>
+    </div>
+    <div class="footer-col">
+      <h3>Discover</h3>
+      <a href="discover.html?audience=kids">Kids &amp; families</a>
+      <a href="discover.html?audience=general">General</a>
+      <a href="categories.html">Categories</a>
+      <a href="discover.html">All activities</a>
+    </div>
+    <div class="footer-col">
+      <h3>Organisers</h3>
+      <a href="organise.html">Create an activity</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="organiser-sales.html">Sales</a>
+      <a href="become-organiser.html">Become an organiser</a>
+    </div>
+    <div class="footer-col">
+      <h3>Account</h3>
+      <a href="my-bookings.html">My bookings</a>
+      <a href="login.html">Log in</a>
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Eventorg</span>
+    <span>Pilot city: Colchester</span>
+  </div>
+</footer>
 
             <script src="js/common.js"></script>
+<script src="js/motion.js"></script>
             <script src="js/register.js"></script>
 
 </body>

@@ -1,321 +1,582 @@
 // Requires common.js loaded first.
 
-function getRole(user) {
-    return String((user && user.role) || '').trim().toLowerCase();
-}
+const API = 'https://darkgoldenrod-reindeer-637131.hostingersite.com/backend';
 
-function createShortcutLink(href, title, description) {
-    return `
-        <a class="event-item shortcut-card" href="${href}">
-            <h3>${title}</h3>
-            <p class="text-muted">${description}</p>
-        </a>
-    `;
+const SECTION_META = {
+  overview: {
+    eyebrow: 'Account',
+    title: 'Overview',
+    sub: 'See bookings, listings and what is next in one place.'
+  },
+  bookings: {
+    eyebrow: 'Tickets',
+    title: 'Bookings',
+    sub: 'Review the activities you have booked and upcoming dates.'
+  },
+  activities: {
+    eyebrow: 'Organiser',
+    title: 'Activities',
+    sub: 'Create and manage the events you list on Eventorg.'
+  },
+  sales: {
+    eyebrow: 'Organiser',
+    title: 'Sales',
+    sub: 'Track bookings, tickets sold and revenue across your listings.'
+  },
+  impact: {
+    eyebrow: 'Organiser',
+    title: 'Impact report',
+    sub: 'Upload session data, set goals, and generate charts and summaries for funders.'
+  },
+  discover: {
+    eyebrow: 'Explore',
+    title: 'Discover',
+    sub: 'Find kids activities and community events near you.'
+  },
+  settings: {
+    eyebrow: 'Account',
+    title: 'Settings',
+    sub: 'Manage your profile, bio and sign-in options.'
+  }
+};
+
+let dashState = {
+  user: null,
+  isOrg: false,
+  orders: [],
+  events: [],
+  summary: {}
+};
+
+function getRole(user) {
+  return normalizeRole((user && user.role) || 'attendee');
 }
 
 function getBioStorageKey(user) {
-    const idPart = (user && user.id) ? `id_${user.id}` : `email_${String((user && user.email) || 'guest').toLowerCase()}`;
-    return `nearby_profile_bio_${idPart}`;
+  const idPart = (user && user.id)
+    ? `id_${user.id}`
+    : `email_${String((user && user.email) || 'guest').toLowerCase()}`;
+  return `nearby_profile_bio_${idPart}`;
 }
 
-function renderDashboardSettings(user) {
-    if (!user || document.getElementById('dashboard-settings')) return;
-
-    const role = getRole(user) || 'attendee';
-    const displayName = user.name || user.email || 'there';
-    const bioKey = getBioStorageKey(user);
-    const existingBio = localStorage.getItem(bioKey) || '';
-
-    const section = document.createElement('section');
-    section.id = 'dashboard-settings';
-    section.className = 'page-card';
-    section.classList.add('page-stack');
-    section.innerHTML = `
-        <div class="section-header">
-            <div>
-                <h2>${(role === 'organiser' || role === 'admin') ? `Welcome, organiser ${displayName}` : `Welcome, ${displayName}`}</h2>
-                <p class="section-subtitle">Update a short bio to personalise your dashboard profile.</p>
-            </div>
-            <span class="pill">${role}</span>
-        </div>
-        <form id="dashboard-settings-form">
-            <label for="dashboard-bio">Bio</label>
-            <textarea id="dashboard-bio" rows="4" maxlength="280" placeholder="Tell people a little about you...">${existingBio}</textarea>
-            <div class="section-header page-stack">
-                <small id="dashboard-bio-count" class="text-muted">${existingBio.length}/280</small>
-                <button type="submit" class="btn">Save bio</button>
-            </div>
-            <p id="dashboard-settings-message" class="helper-text hidden-inline">Saved.</p>
-        </form>
-    `;
-
-    const shortcuts = document.getElementById('dashboard-shortcuts');
-    if (shortcuts && shortcuts.parentNode) {
-        if (shortcuts.nextSibling) {
-            shortcuts.parentNode.insertBefore(section, shortcuts.nextSibling);
-        } else {
-            shortcuts.parentNode.appendChild(section);
-        }
-    } else {
-        document.body.prepend(section);
-    }
-
-    const form = document.getElementById('dashboard-settings-form');
-    const bioField = document.getElementById('dashboard-bio');
-    const countEl = document.getElementById('dashboard-bio-count');
-    const messageEl = document.getElementById('dashboard-settings-message');
-
-    if (!form || !bioField || !countEl || !messageEl) return;
-
-    const updateCount = () => {
-        countEl.textContent = `${bioField.value.length}/280`;
-    };
-
-    bioField.addEventListener('input', () => {
-        updateCount();
-        messageEl.classList.add('hidden-inline');
-    });
-
-    form.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const bio = bioField.value.trim();
-        localStorage.setItem(bioKey, bio);
-        updateCount();
-        messageEl.textContent = 'Your bio has been saved.';
-        messageEl.classList.remove('hidden-inline');
-    });
+function formatShortDate(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d)) return 'Date TBC';
+  return d.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }
 
-function renderRoleShortcuts(currentUser) {
-    const shortcuts = document.getElementById('dashboard-shortcuts');
-    if (!shortcuts || !currentUser) return;
-
-    const role = getRole(currentUser) || 'attendee';
-
-    const commonLinks = [
-        { href: 'browse.html', title: 'Browse events', description: 'Discover events you can book right now.' },
-        { href: 'categories.html', title: 'Browse by category', description: 'Filter events by music, sports, food, and more.' }
-    ];
-
-    const attendeeLinks = [
-        { href: 'event.html', title: 'Go to events', description: 'Open the event page and start booking tickets.' },
-        { href: 'my-bookings.html', title: 'My bookings', description: 'Review, track, and manage your ticket bookings.' }
-    ];
-
-    const organiserLinks = [
-        { href: 'organise.html', title: 'Organise an event', description: 'Create or edit your event listing.' },
-        { href: 'dashboard.html#organiser-control-panel', title: 'Manage my events', description: 'Review your organiser control panel and event list.' },
-        { href: 'organiser-sales.html', title: 'Sales and attendees', description: 'Track bookings, attendees, and revenue by event.' }
-    ];
-
-    const roleLinks = (role === 'organiser' || role === 'admin') ? organiserLinks : attendeeLinks;
-
-    shortcuts.innerHTML = `
-        <div class="section-header">
-            <div>
-                <h2>Your dashboard links</h2>
-                <p class="section-subtitle">Signed in as ${currentUser.name || currentUser.email} (${role.toUpperCase()})</p>
-            </div>
-            <a href="#" id="logout-link" class="btn btn-ghost">Log out</a>
-        </div>
-        <div class="shortcut-grid">
-            ${commonLinks.map((l) => createShortcutLink(l.href, l.title, l.description)).join('')}
-            ${roleLinks.map((l) => createShortcutLink(l.href, l.title, l.description)).join('')}
-        </div>
-    `;
-
-    document.getElementById('logout-link').addEventListener('click', (e) => {
-        e.preventDefault();
-        logout();
-    });
-
-    if (role === 'organiser' || role === 'admin') {
-        renderOrganiserDashboardPanel(currentUser);
-    }
+function isUpcoming(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d)) return false;
+  return d.getTime() >= Date.now() - 60 * 60 * 1000;
 }
 
-function showInlineMessage(msg, isError = false) {
-    let msgEl = document.getElementById('dashboard-notice');
-    if (!msgEl) {
-        msgEl = document.createElement('div');
-        msgEl.id = 'dashboard-notice';
-        msgEl.className = 'form-notice';
-        const formEl = document.getElementById('newsletter-form');
-        if (formEl) formEl.prepend(msgEl);
-    }
-    msgEl.textContent = msg;
-    msgEl.className = `form-notice ${isError ? 'error' : 'success'}`;
-    msgEl.style.display = 'block';
+function showBoot(show) {
+  const boot = document.getElementById('dash-boot');
+  if (boot) boot.hidden = !show;
+  document.body.classList.toggle('is-dash-booting', !!show);
 }
 
-async function renderOrganiserDashboardPanel(user) {
-    if (document.getElementById('organiser-control-panel')) return;
-
-    const panel = document.createElement('div');
-    panel.id = 'organiser-control-panel';
-    panel.className = 'surface-card page-container-wide page-stack';
-    panel.innerHTML = `
-        <div class="dashboard-panel-head">
-            <div>
-                <h2>Organiser Control Panel</h2>
-                <p class="text-muted">Manage your created events, track ticket sales, and create new experiences.</p>
-            </div>
-            <a href="organise.html" id="organiser-create-event-link" class="btn btn-primary">+ Create Event</a>
-        </div>
-        <div id="organiser-events-list"><p class="text-muted">Loading your events…</p></div>
-    `;
-
-    const nav = document.querySelector('nav');
-    if (nav && nav.nextSibling) {
-        nav.parentNode.insertBefore(panel, nav.nextSibling);
-    } else {
-        document.body.prepend(panel);
-    }
-
-    try {
-        // events.php now returns organiser_id on every event, and (for
-        // logged-in organisers) also includes their own draft/cancelled
-        // events, not just published ones. Filtering client-side by
-        // organiser_id — the previous version filtered by organiser_name,
-        // a field the backend never actually returned, so this list was
-        // always empty even for organisers who had created events.
-        const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/events.php`);
-        const allEvents = (data && data.events) || [];
-
-        const myEvents = getRole(user) === 'admin'
-            ? allEvents
-            : allEvents.filter((ev) => Number(ev.organiser_id) === Number(user.id));
-
-        const listEl = document.getElementById('organiser-events-list');
-        if (myEvents.length === 0) {
-            listEl.innerHTML = `<p class="text-muted">You haven't created any events yet. <a href="organise.html">Create your first event</a>.</p>`;
-            return;
-        }
-
-        listEl.innerHTML = `
-            <div class="dashboard-event-grid">
-                ${myEvents.map((ev) => {
-                    const dt = ev.start_datetime ? new Date(ev.start_datetime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date TBC';
-                    const statusBadge = ev.status !== 'published' ? `<span class="status-pill status-pill-draft">${ev.status}</span>` : '';
-                    return `
-                        <div class="record-card">
-                            <div>
-                                <span class="status-pill">${ev.category_name || 'Event'}</span> ${statusBadge}
-                                <h3 class="page-stack">${ev.title}</h3>
-                                <p class="record-meta">📅 ${dt}</p>
-                                <p class="record-meta">📍 ${ev.venue || 'Location TBC'}</p>
-                            </div>
-                            <div class="button-row border-top-soft">
-                                <a href="organise.html?edit=${ev.id}" class="btn btn-primary">Edit</a>
-                                <a href="event.html?id=${ev.id}" class="btn btn-ghost">View</a>
-                            </div>
-                        </div>`;
-                }).join('')}
-            </div>
-        `;
-    } catch (err) {
-        document.getElementById('organiser-events-list').innerHTML = `<p class="notice">Could not load your events.</p>`;
-    }
+function showGate(show) {
+  const gate = document.getElementById('dash-gate');
+  const app = document.getElementById('dash-app');
+  if (gate) gate.hidden = !show;
+  if (app) app.hidden = show;
+  document.body.classList.toggle('is-dash-ready', !show);
+  if (!show) showBoot(false);
 }
 
-async function loadFeaturedEvents() {
-    const container = document.querySelector('.event-list');
-    if (!container) return;
+function closeSidebar() {
+  document.body.classList.remove('dash-sidebar-open');
+  const backdrop = document.getElementById('dash-backdrop');
+  if (backdrop) backdrop.hidden = true;
+}
 
-    const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/events.php`);
-    const events = (data && data.events) || [];
+function openSidebar() {
+  document.body.classList.add('dash-sidebar-open');
+  const backdrop = document.getElementById('dash-backdrop');
+  if (backdrop) backdrop.hidden = false;
+}
 
-    if (events.length === 0) {
-        container.innerHTML = `<p>No events yet — check back soon.</p>`;
-        return;
-    }
+function renderEmptyState(title, body, ctaHref, ctaLabel, emptyIcon = 'ticket') {
+  return `
+    <div class="dash-empty">
+      <div class="dash-empty-icon" aria-hidden="true">${icon(emptyIcon, 'icon')}</div>
+      <h3>${title}</h3>
+      <p>${body}</p>
+      ${ctaHref ? `<a class="btn btn-primary" href="${ctaHref}">${ctaLabel}</a>` : ''}
+    </div>
+  `;
+}
 
-    container.innerHTML = events.slice(0, 6).map((ev) => {
-        const formattedDate = ev.start_datetime
-            ? new Date(ev.start_datetime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-            : 'Date TBC';
-        const price = (ev.min_price !== null && ev.min_price !== undefined)
-            ? (Number(ev.min_price) === 0 ? 'Free Entry' : `£${Number(ev.min_price).toFixed(2)}`)
-            : 'Free Entry';
+function renderMetrics(targetId, items) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  el.innerHTML = items.map((item) => `
+    <article class="dash-metric">
+      <div class="dash-metric-top">
+        <span class="dash-metric-icon" aria-hidden="true">${icon(item.icon || 'chart', 'icon')}</span>
+        <h2>${item.label}</h2>
+      </div>
+      <p class="dash-metric-value">${item.value}</p>
+      ${item.hint ? `<p class="dash-metric-hint">${item.hint}</p>` : ''}
+    </article>
+  `).join('');
+}
 
+function bookingCards(orders, limit) {
+  const list = Array.isArray(orders) ? orders : [];
+  const sliced = typeof limit === 'number' ? list.slice(0, limit) : list;
+
+  if (!sliced.length) {
+    return renderEmptyState(
+      'No bookings yet',
+      'Discover kids and general activities happening near you.',
+      'discover.html',
+      'Browse activities',
+      'ticket'
+    );
+  }
+
+  return `
+    <div class="dash-list">
+      ${sliced.map((order) => `
+        <article class="dash-list-item">
+          <div>
+            <h3>${order.event_title || 'Event'}</h3>
+            <p class="record-meta">${icon('calendar', 'icon icon-sm')} ${formatShortDate(order.start_datetime)}</p>
+            <p class="record-meta">${icon('mapPin', 'icon icon-sm')} ${order.venue || 'Location TBC'}</p>
+            <p class="record-meta">${icon('ticket', 'icon icon-sm')} ${Number(order.tickets_count || 0)} ticket(s)</p>
+          </div>
+          <div class="dash-list-meta">
+            <span class="status-pill">${order.status || 'booked'}</span>
+            <a href="event.html?id=${encodeURIComponent(order.event_id)}" class="btn btn-ghost">View</a>
+          </div>
+        </article>
+      `).join('')}
+    </div>
+  `;
+}
+
+function activityCards(events, limit) {
+  const list = Array.isArray(events) ? events : [];
+  const sliced = typeof limit === 'number' ? list.slice(0, limit) : list;
+
+  if (!sliced.length) {
+    return renderEmptyState(
+      'No activities yet',
+      'List your first activity and start taking bookings.',
+      'organise.html',
+      'Create an activity',
+      'calendar'
+    );
+  }
+
+  return `
+    <div class="dash-list">
+      ${sliced.map((ev) => {
+        const dt = ev.start_datetime
+          ? new Date(ev.start_datetime).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          : 'Date TBC';
+        const status = String(ev.status || 'published').toLowerCase();
         return `
-        <div class="event-item record-card"
-             data-id="${ev.id}" data-name="${ev.title}" data-location="${ev.venue || 'TBC'}"
-             data-time="${formattedDate}" data-price="${price}">
-            <h3>${ev.title}</h3>
-            <p>📍 ${ev.venue || 'Location TBC'}</p>
-            <p>🕒 ${formattedDate}</p>
-            <p class="record-total">${price}</p>
-            <a href="event.html?id=${ev.id}">View Page →</a>
-        </div>`;
-    }).join('');
-
-    attachEventClickHandlers();
+          <article class="dash-list-item">
+            <div>
+              <div class="dash-list-tags">
+                <span class="status-pill">${ev.category_name || 'Event'}</span>
+                ${status !== 'published' ? `<span class="status-pill status-pill-draft">${status}</span>` : ''}
+              </div>
+              <h3>${ev.title}</h3>
+              <p class="record-meta">${icon('calendar', 'icon icon-sm')} ${dt}</p>
+              <p class="record-meta">${icon('mapPin', 'icon icon-sm')} ${ev.venue || 'Location TBC'}</p>
+            </div>
+            <div class="dash-list-meta">
+              <a href="organise.html?edit=${ev.id}" class="btn btn-primary">Edit</a>
+              <a href="event.html?id=${ev.id}" class="btn btn-ghost">View</a>
+            </div>
+          </article>
+        `;
+      }).join('')}
+    </div>
+  `;
 }
 
-function attachEventClickHandlers() {
-    const dialog = document.getElementById('event-dialog');
-    const closeBtn = document.getElementById('close-dialog');
-    if (closeBtn && dialog) closeBtn.onclick = () => dialog.close();
+function setActiveSection(sectionId) {
+  const allowed = dashState.isOrg
+    ? ['overview', 'bookings', 'activities', 'sales', 'impact', 'discover', 'settings']
+    : ['overview', 'bookings', 'discover', 'settings'];
 
-    document.querySelectorAll('.event-item').forEach((item) => {
-        item.addEventListener('click', (e) => {
-            if (e.target.tagName.toLowerCase() === 'a') return;
-            const { name, location, time, price } = item.dataset;
-            if (!dialog) return;
-            document.getElementById('event-name').textContent = `Event Name: ${name || 'Event'}`;
-            document.getElementById('event-location').textContent = `Location: ${location || 'TBC'}`;
-            document.getElementById('event-time').textContent = `Time: ${time || 'TBC'}`;
-            document.getElementById('event-price').textContent = `Price: ${price || 'Free'}`;
-            if (typeof dialog.showModal === 'function') dialog.showModal();
-        });
-    });
+  const next = allowed.includes(sectionId) ? sectionId : 'overview';
+  const meta = SECTION_META[next] || SECTION_META.overview;
+
+  document.querySelectorAll('.dash-nav-item').forEach((btn) => {
+    btn.classList.toggle('is-active', btn.dataset.section === next);
+  });
+
+  document.querySelectorAll('[data-section-panel]').forEach((panel) => {
+    const match = panel.dataset.sectionPanel === next;
+    panel.hidden = !match;
+    panel.classList.toggle('is-active', match);
+  });
+
+  const eyebrow = document.getElementById('dash-eyebrow');
+  const title = document.getElementById('dash-section-title');
+  const subcopy = document.getElementById('dash-subcopy');
+  if (eyebrow) eyebrow.textContent = meta.eyebrow;
+  if (title) title.textContent = meta.title;
+  if (subcopy) subcopy.textContent = meta.sub;
+
+  closeSidebar();
+
+  if (window.location.hash !== `#${next}`) {
+    window.history.replaceState({}, '', `${window.location.pathname}#${next}`);
+  }
+
+  if (next === 'impact' && dashState.isOrg && typeof window.loadImpactSection === 'function') {
+    window.loadImpactSection();
+  }
 }
 
-const newsletterForm = document.getElementById('newsletter-form');
-if (newsletterForm) {
-    newsletterForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const emailInput = document.getElementById('newsletter-email');
-        const email = emailInput.value.trim().toLowerCase();
-
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            showInlineMessage('Please enter a valid email address.', true);
-            return;
-        }
-
-        const submitBtn = newsletterForm.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-
-        // Real endpoint now — the old version faked a success message even
-        // when newsletter.php didn't exist at all.
-        const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/newsletter.php`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ email })
-        });
-
-        submitBtn.disabled = false;
-        if (data && data.success) {
-            emailInput.value = '';
-            showInlineMessage(data.message || 'Thanks for subscribing!');
-        } else {
-            showInlineMessage((data && data.message) || 'Could not subscribe right now.', true);
-        }
+function bindNavigation() {
+  const nav = document.getElementById('dash-side-nav');
+  if (nav) {
+    nav.querySelectorAll('.dash-nav-item').forEach((btn) => {
+      const ico = btn.querySelector('.dash-nav-ico');
+      const name = btn.dataset.icon;
+      if (ico && name) ico.innerHTML = icon(name, 'icon icon-sm');
     });
+
+    nav.addEventListener('click', (event) => {
+      const btn = event.target.closest('.dash-nav-item');
+      if (!btn || !btn.dataset.section) return;
+      event.preventDefault();
+      setActiveSection(btn.dataset.section);
+    });
+  }
+
+  document.querySelectorAll('[data-goto]').forEach((el) => {
+    el.addEventListener('click', () => setActiveSection(el.getAttribute('data-goto')));
+  });
+
+  const toggle = document.getElementById('dash-sidebar-toggle');
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      if (document.body.classList.contains('dash-sidebar-open')) closeSidebar();
+      else openSidebar();
+    });
+  }
+
+  const backdrop = document.getElementById('dash-backdrop');
+  if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+  const hash = String(window.location.hash || '').replace('#', '');
+  setActiveSection(hash || 'overview');
+
+  document.querySelectorAll('[data-discover-icon]').forEach((el) => {
+    el.innerHTML = icon(el.getAttribute('data-discover-icon'), 'icon');
+  });
+}
+
+function getNameStorageKey(user) {
+  const idPart = (user && user.id)
+    ? `id_${user.id}`
+    : `email_${String((user && user.email) || 'guest').toLowerCase()}`;
+  return `nearby_profile_name_${idPart}`;
+}
+
+function getPreferredDisplayName(user) {
+  const stored = localStorage.getItem(getNameStorageKey(user));
+  if (stored && stored.trim()) return stored.trim();
+  return getUserDisplayName(user) || user.email || 'there';
+}
+
+function bindProfileForm(user) {
+  const form = document.getElementById('dashboard-settings-form');
+  const bioField = document.getElementById('dashboard-bio');
+  const nameField = document.getElementById('dashboard-display-name');
+  const countEl = document.getElementById('dashboard-bio-count');
+  const messageEl = document.getElementById('dashboard-settings-message');
+  if (!form || !bioField || !nameField || !countEl || !messageEl) return;
+
+  const bioKey = getBioStorageKey(user);
+  const nameKey = getNameStorageKey(user);
+  const existingBio = localStorage.getItem(bioKey) || '';
+  const existingName = localStorage.getItem(nameKey) || getUserDisplayName(user) || '';
+
+  bioField.value = existingBio;
+  nameField.value = existingName;
+  countEl.textContent = `${existingBio.length}/280`;
+
+  bioField.addEventListener('input', () => {
+    countEl.textContent = `${bioField.value.length}/280`;
+    messageEl.classList.add('hidden-inline');
+  });
+
+  nameField.addEventListener('input', () => {
+    messageEl.classList.add('hidden-inline');
+  });
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const nextName = nameField.value.trim();
+    const nextBio = bioField.value.trim();
+    localStorage.setItem(nameKey, nextName);
+    localStorage.setItem(bioKey, nextBio);
+    countEl.textContent = `${bioField.value.length}/280`;
+    messageEl.textContent = 'Profile saved.';
+    messageEl.classList.remove('hidden-inline');
+
+    const display = nextName || getUserDisplayName(user) || user.email || 'there';
+    const sidebarName = document.getElementById('dash-sidebar-name');
+    const settingsName = document.getElementById('dash-settings-name');
+    const avatar = document.getElementById('dash-avatar');
+    const settingsAvatar = document.getElementById('dash-settings-avatar');
+    if (sidebarName) sidebarName.textContent = display;
+    if (settingsName) settingsName.textContent = display;
+    const initial = display.charAt(0).toUpperCase() || '?';
+    if (avatar) avatar.textContent = initial;
+    if (settingsAvatar) settingsAvatar.textContent = initial;
+  });
+}
+
+function renderShell(user) {
+  const role = getRole(user);
+  const name = getPreferredDisplayName(user);
+  const isOrg = isOrganiserRole(user);
+
+  const sidebarName = document.getElementById('dash-sidebar-name');
+  const sidebarEmail = document.getElementById('dash-sidebar-email');
+  const rolePill = document.getElementById('dash-role-pill');
+  const settingsMeta = document.getElementById('dash-settings-meta');
+  const settingsName = document.getElementById('dash-settings-name');
+  const settingsEmail = document.getElementById('dash-settings-email');
+  const settingsRole = document.getElementById('dash-settings-role');
+  const settingsAvatar = document.getElementById('dash-settings-avatar');
+  const sideCta = document.getElementById('dash-side-cta');
+
+  if (sidebarName) sidebarName.textContent = name;
+  if (sidebarEmail) sidebarEmail.textContent = user.email || '—';
+  if (rolePill) rolePill.textContent = role;
+  if (settingsName) settingsName.textContent = name;
+  if (settingsEmail) settingsEmail.textContent = user.email || '—';
+  if (settingsRole) settingsRole.textContent = role;
+
+  const avatar = document.getElementById('dash-avatar');
+  const initial = String(name).trim().charAt(0).toUpperCase() || '?';
+  if (avatar) avatar.textContent = initial;
+  if (settingsAvatar) settingsAvatar.textContent = initial;
+
+  document.querySelectorAll('[data-org-only]').forEach((el) => {
+    el.hidden = !isOrg;
+  });
+
+  if (sideCta) {
+    if (isOrg) {
+      sideCta.textContent = 'Create an activity';
+      sideCta.href = 'organise.html';
+    } else {
+      sideCta.textContent = 'Browse activities';
+      sideCta.href = 'discover.html';
+    }
+  }
+
+  if (settingsMeta) {
+    settingsMeta.innerHTML = `
+      <div class="dash-field-readonly">
+        <span class="dash-field-label">Full name</span>
+        <span class="dash-field-value">${user.name || name}</span>
+      </div>
+      <div class="dash-field-readonly">
+        <span class="dash-field-label">Email</span>
+        <span class="dash-field-value">${user.email || '—'}</span>
+      </div>
+      <div class="dash-field-readonly">
+        <span class="dash-field-label">Account type</span>
+        <span class="dash-field-value">${role}</span>
+      </div>
+    `;
+  }
+}
+
+function renderOverview() {
+  const { isOrg, orders, events, summary } = dashState;
+  const upcoming = orders.filter((o) => {
+    const status = String(o.status || '').toLowerCase();
+    return status !== 'cancelled' && isUpcoming(o.start_datetime);
+  });
+  const tickets = orders.reduce((sum, o) => sum + Number(o.tickets_count || 0), 0);
+
+  if (isOrg) {
+    const published = events.filter((ev) => String(ev.status || 'published').toLowerCase() === 'published').length;
+    renderMetrics('dash-metrics', [
+      { label: 'Your events', value: String(events.length), hint: `${published} published`, icon: 'calendar' },
+      { label: 'Bookings', value: String(Number(summary.bookings_count || 0)), hint: 'Across your listings', icon: 'ticket' },
+      { label: 'Tickets sold', value: String(Number(summary.tickets_sold || 0)), hint: 'Confirmed tickets', icon: 'users' },
+      { label: 'Revenue', value: `£${Number(summary.revenue || 0).toFixed(2)}`, hint: 'Gross from bookings', icon: 'chart' }
+    ]);
+  } else {
+    renderMetrics('dash-metrics', [
+      { label: 'Total bookings', value: String(orders.length), hint: 'All time', icon: 'ticket' },
+      { label: 'Upcoming', value: String(upcoming.length), hint: 'Still to attend', icon: 'calendar' },
+      { label: 'Tickets', value: String(tickets), hint: 'Across bookings', icon: 'users' }
+    ]);
+  }
+
+  const listTitle = document.getElementById('dash-overview-list-title');
+  const gotoBtn = document.getElementById('dash-overview-goto');
+  const listEl = document.getElementById('dash-overview-list');
+  const linksEl = document.getElementById('dash-overview-links');
+
+  if (isOrg) {
+    if (listTitle) listTitle.textContent = 'Your activities';
+    if (gotoBtn) {
+      gotoBtn.setAttribute('data-goto', 'activities');
+      gotoBtn.textContent = 'All activities';
+    }
+    if (listEl) listEl.innerHTML = activityCards(events, 4);
+    if (linksEl) {
+      linksEl.innerHTML = `
+        <a href="organise.html"><span class="dash-link-ico" aria-hidden="true">${icon('spark', 'icon icon-sm')}</span><span>Create activity</span></a>
+        <button type="button" data-goto="sales"><span class="dash-link-ico" aria-hidden="true">${icon('chart', 'icon icon-sm')}</span><span>View sales</span></button>
+        <button type="button" data-goto="impact"><span class="dash-link-ico" aria-hidden="true">${icon('chart', 'icon icon-sm')}</span><span>Impact report</span></button>
+        <a href="discover.html"><span class="dash-link-ico" aria-hidden="true">${icon('search', 'icon icon-sm')}</span><span>Discover</span></a>
+        <button type="button" data-goto="settings"><span class="dash-link-ico" aria-hidden="true">${icon('settings', 'icon icon-sm')}</span><span>Settings</span></button>
+      `;
+    }
+  } else {
+    if (listTitle) listTitle.textContent = 'Upcoming bookings';
+    if (gotoBtn) {
+      gotoBtn.setAttribute('data-goto', 'bookings');
+      gotoBtn.textContent = 'All bookings';
+    }
+    if (listEl) listEl.innerHTML = bookingCards(upcoming, 4);
+    if (linksEl) {
+      linksEl.innerHTML = `
+        <a href="discover.html"><span class="dash-link-ico" aria-hidden="true">${icon('search', 'icon icon-sm')}</span><span>Discover activities</span></a>
+        <a href="discover.html?audience=kids"><span class="dash-link-ico" aria-hidden="true">${icon('users', 'icon icon-sm')}</span><span>Kids &amp; families</span></a>
+        <a href="become-organiser.html#organiser-signup"><span class="dash-link-ico" aria-hidden="true">${icon('spark', 'icon icon-sm')}</span><span>Become an organiser</span></a>
+        <button type="button" data-goto="settings"><span class="dash-link-ico" aria-hidden="true">${icon('settings', 'icon icon-sm')}</span><span>Settings</span></button>
+      `;
+    }
+  }
+
+  if (linksEl) {
+    linksEl.querySelectorAll('[data-goto]').forEach((el) => {
+      el.addEventListener('click', () => setActiveSection(el.getAttribute('data-goto')));
+    });
+  }
+
+  if (gotoBtn) {
+    gotoBtn.onclick = () => setActiveSection(gotoBtn.getAttribute('data-goto'));
+  }
+}
+
+function renderBookingsSection() {
+  const body = document.getElementById('dash-bookings-body');
+  if (body) body.innerHTML = bookingCards(dashState.orders);
+}
+
+function renderActivitiesSection() {
+  const body = document.getElementById('dash-activities-body');
+  if (body) body.innerHTML = activityCards(dashState.events);
+}
+
+function renderSalesSection() {
+  const { summary, events } = dashState;
+  renderMetrics('dash-sales-metrics', [
+    { label: 'Bookings', value: String(Number(summary.bookings_count || 0)), icon: 'ticket' },
+    { label: 'Tickets sold', value: String(Number(summary.tickets_sold || 0)), icon: 'users' },
+    { label: 'Revenue', value: `£${Number(summary.revenue || 0).toFixed(2)}`, icon: 'chart' },
+    { label: 'Events', value: String(events.length), icon: 'calendar' }
+  ]);
+
+  const body = document.getElementById('dash-sales-body');
+  if (!body) return;
+  body.innerHTML = `
+    <p class="dash-card-copy">See attendee details, refunds and per-event performance on the full sales page.</p>
+    <div class="button-row">
+      <a href="organiser-sales.html" class="btn btn-primary">Open sales &amp; attendees</a>
+      <a href="organise.html" class="btn btn-ghost">Create activity</a>
+    </div>
+  `;
+}
+
+async function loadDashboardData(user) {
+  const isOrg = isOrganiserRole(user);
+  dashState.user = user;
+  dashState.isOrg = isOrg;
+
+  if (isOrg) {
+    const [ordersData, eventsData, salesData] = await Promise.all([
+      fetchJSON(`${API}/orders.php`),
+      fetchJSON(`${API}/events.php`),
+      fetchJSON(`${API}/organiser-bookings.php`)
+    ]);
+
+    const allEvents = (eventsData && eventsData.events) || [];
+    dashState.events = getRole(user) === 'admin'
+      ? allEvents
+      : allEvents.filter((ev) => Number(ev.organiser_id) === Number(user.id));
+    dashState.orders = (ordersData && ordersData.orders) || [];
+    dashState.summary = (salesData && salesData.success && salesData.summary) ? salesData.summary : {};
+  } else {
+    const ordersData = await fetchJSON(`${API}/orders.php`);
+    dashState.orders = (ordersData && ordersData.orders) || [];
+    dashState.events = [];
+    dashState.summary = {};
+  }
+
+  renderOverview();
+  renderBookingsSection();
+  if (isOrg) {
+    renderActivitiesSection();
+    renderSalesSection();
+  }
 }
 
 (async () => {
-    // Prefer the real server session, but fall back to cached login data so
-    // dashboard controls still render if the session check temporarily fails.
-    const cachedUser = getCurrentUser();
-    const serverUser = await refreshCurrentUser();
-    const currentUser = serverUser || cachedUser;
+  showBoot(true);
 
-    if (currentUser) {
-        if (!serverUser) setCurrentUser(currentUser);
-        renderRoleShortcuts(currentUser);
-        renderDashboardSettings(currentUser);
+  const cachedUser = getCurrentUser();
+  // Prefer cached session for a fast path, then confirm with the server.
+  const serverUser = await refreshCurrentUser();
+  const currentUser = serverUser || cachedUser;
+
+  if (!currentUser) {
+    showBoot(false);
+    showGate(true);
+    return;
+  }
+
+  if (!serverUser) setCurrentUser(currentUser);
+  showGate(false);
+  renderShell(currentUser);
+  bindProfileForm(currentUser);
+  bindNavigation();
+
+  const logoutBtn = document.getElementById('dash-logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'login.html?next=dashboard.html';
+    });
+  }
+
+  try {
+    await loadDashboardData(currentUser);
+    if (String(window.location.hash || '').replace('#', '') === 'impact' && isOrganiserRole(currentUser) && typeof window.loadImpactSection === 'function') {
+      window.loadImpactSection();
     }
-    loadFeaturedEvents();
+  } catch (err) {
+    const listEl = document.getElementById('dash-overview-list');
+    if (listEl) {
+      listEl.innerHTML = '<p class="notice">Could not load dashboard data. Please refresh.</p>';
+    }
+  }
 })();

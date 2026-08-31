@@ -8,15 +8,7 @@ function showMessage(elementId, message, isSuccess = false) {
   element.classList.add(isSuccess ? 'success-box' : 'notice');
 }
 
-document.querySelectorAll('[data-toggle-password]').forEach((button) => {
-  button.addEventListener('click', () => {
-    const input = document.getElementById(button.dataset.togglePassword);
-    if (!input) return;
-    const shouldReveal = input.type === 'password';
-    input.type = shouldReveal ? 'text' : 'password';
-    button.textContent = shouldReveal ? 'Hide' : 'Show';
-  });
-});
+// Password visibility toggles are handled in common.js (eye icons).
 
 const forgotForm = document.getElementById('forgot-password-form');
 const verifyForm = document.getElementById('verify-code-form');

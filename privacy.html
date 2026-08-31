@@ -3,19 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy — Nearby</title>
+    <title>Privacy Policy — Eventorg</title>
     <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/motion.css">
 </head>
 <body>
-    <header>
-        <div class="nav-inner">
-            <a class="logo" href="index.html"><span class="dot"></span>Nearby</a>
-            <nav class="links">
-                <a href="browse.html">Browse</a>
-                <a href="categories.html">Categories</a>
-            </nav>
-        </div>
-    </header>
+    <header class="site-header">
+  <div class="nav-inner">
+    <a class="logo" href="index.html">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+      </span>
+      Eventorg
+    </a>
+    <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="discover.html?audience=kids">Kids</a>
+      <a href="discover.html?audience=general">General</a>
+      <a href="categories.html">Categories</a>
+      <a href="organise.html" id="organise-link">For organisers</a>
+      <a href="my-bookings.html">Bookings</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost">Log in</a>
+      <a href="register.html" class="btn btn-primary">Sign up</a>
+    </div>
+  </div>
+</header>
 
     <main class="page-container">
     <article class="policy-shell stack-md">
@@ -36,20 +50,57 @@
 
     <h2>5. Your Rights</h2>
     <p>You have the right to access, update, or delete your personal information. Please contact us at 
-        <a href="mailto:support@nearby.com">support@nearby.com</a> for any requests.</p>
+        <a href="mailto:support@eventorg.com">support@eventorg.com</a> for any requests.</p>
 
     <h2>6. Changes to This Policy</h2>
     <p>We may update this privacy policy from time to time. We will notify you of any significant changes by posting the new policy on our website.</p>
 
     <h2>7. Contact Information</h2>
     <p>If you have any questions or concerns about this privacy policy, please contact us at 
-        <a href="mailto:support@nearby.com">support@nearby.com</a>.
+        <a href="mailto:support@eventorg.com">support@eventorg.com</a>.
     </p>
     </article>
     </main>
 
-    <footer>
-        Built for organisers managing events, to list, book and manage operations easily · Nearby is a demo events marketplace.
-    </footer>
+    <footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a class="logo" href="index.html">
+        <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+      </span>
+        Eventorg
+      </a>
+      <p>Connecting activity organisers and families — with marketplace-level insight no single booking tool can generate alone.</p>
+    </div>
+    <div class="footer-col">
+      <h3>Discover</h3>
+      <a href="discover.html?audience=kids">Kids &amp; families</a>
+      <a href="discover.html?audience=general">General</a>
+      <a href="categories.html">Categories</a>
+      <a href="discover.html">All activities</a>
+    </div>
+    <div class="footer-col">
+      <h3>Organisers</h3>
+      <a href="organise.html">Create an activity</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="organiser-sales.html">Sales</a>
+      <a href="become-organiser.html">Become an organiser</a>
+    </div>
+    <div class="footer-col">
+      <h3>Account</h3>
+      <a href="my-bookings.html">My bookings</a>
+      <a href="login.html">Log in</a>
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Eventorg</span>
+    <span>Pilot city: Colchester</span>
+  </div>
+</footer>
+<script src="js/common.js"></script>
+<script src="js/motion.js"></script>
 </body>
 </html>

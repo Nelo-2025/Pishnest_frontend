@@ -3,20 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Events Manager</title>
+<title>Eventorg — Activities for families in Colchester</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="css/style.css" rel="stylesheet">
+<link rel="stylesheet" href="css/motion.css">
 </head>
 <body>
 
-<header>
+<header class="site-header">
   <div class="nav-inner">
-    <div class="logo"><span class="dot"></span>Nearby</div>
-    <nav class="links">
-      <a href="browse.html">Browse</a>
+    <a class="logo" href="index.html">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+      </span>
+      Eventorg
+    </a>
+    <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="discover.html?audience=kids" aria-current="page">Kids</a>
+      <a href="discover.html?audience=general">General</a>
       <a href="categories.html">Categories</a>
-      <a href="organise.html" id="organise-link">Organise an event</a>
-      <a href="event.html">Event page</a>
+      <a href="organise.html" id="organise-link">For organisers</a>
+      <a href="my-bookings.html">Bookings</a>
     </nav>
     <div class="nav-actions" id="nav-actions">
       <a href="login.html" class="btn btn-ghost">Log in</a>
@@ -26,71 +35,183 @@
 </header>
 
 <section class="hero">
-  <div>
-    <h1>Find things happening <span class="accent-underline">near you</span>, this week.</h1>
-    <p>Workshops, gigs, markets and meetups — browse what's on, grab a ticket, and get a confirmation in seconds.</p>
-
-    <form class="search-bar" id="search-form">
-      <input type="text" id="search-input" placeholder="Search events, venues, organisers…" aria-label="Search events">
-      <select id="category-select" aria-label="Filter by category">
-        <option value="">All categories</option>
-      </select>
-      <button type="submit">Search</button>
-    </form>
-
-    <div class="hero-stats">
-      <div><strong id="stat-events">—</strong>events live</div>
-      <div><strong id="stat-cities">—</strong>towns covered</div>
-      <div><strong>Free</strong>to list</div>
-    </div>
+  <div class="hero-media" aria-hidden="true">
+    <video autoplay muted loop playsinline poster="assets/media/events/kids.jpg">
+      <source src="assets/media/hero-events.mp4" type="video/mp4">
+    </video>
+    <div class="hero-scrim"></div>
   </div>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="brand-lockup">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+        </span>
+        Eventorg
+      </div>
+      <h1>Find the right activity <span class="mark">near you</span></h1>
+      <p class="hero-lead">Discover and book children’s activities and local events in one place — starting in Colchester.</p>
+      <div class="hero-actions">
+        <a href="discover.html?audience=kids" class="btn btn-yellow">Browse kids activities</a>
+        <a href="become-organiser.html" class="btn btn-ghost-light">Become an Organiser</a>
+      </div>
+    </div>
 
-  <div class="ticket-visual">
-    <div class="stub">
-      <div class="eyebrow">Featured · This Saturday</div>
-      <h3>Colchester Maker's Market</h3>
-      <div class="meta">
-        <span>📍 Colchester Castle Park</span>
-        <span>🕒 10:00 – 16:00</span>
-      </div>
-      <div class="perforation"></div>
-      <div class="price-row">
-        <div class="price">£<span>0</span></div>
-        <div class="qr"></div>
-      </div>
+    <div class="hero-visual">
+      <div class="hero-accent" aria-hidden="true"></div>
+      <a class="hero-panel" href="discover.html?audience=kids">
+        <div class="hero-panel-image">
+          <img src="assets/media/events/kids.jpg" alt="Children enjoying an outdoor activity">
+        </div>
+        <div class="hero-panel-body">
+          <div class="hero-panel-top">
+            <span class="hero-pill">This Saturday · Colchester</span>
+          </div>
+          <h3>Forest School Adventure</h3>
+          <div class="hero-panel-meta">
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 1 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Castle Park, Colchester</div>
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 10:00 – 12:00 · Ages 5–9</div>
+          </div>
+          <div class="hero-panel-foot">
+            <div class="price">£8</div>
+            <span>Book instantly</span>
+          </div>
+        </div>
+      </a>
     </div>
   </div>
 </section>
-
-<div class="categories" id="category-chips">
-  <button class="chip active" data-category="">All</button>
-  <!-- more chips injected by JS -->
-</div>
 
 <section class="section">
   <div class="section-head">
-    <h2>Happening soon</h2>
-    <a href="browse.html">View all →</a>
+    <div>
+      <h2>Discover in two places</h2>
+      <p class="section-subtitle">Kids activities and the wider local calendar — one hub for families.</p>
+    </div>
+  </div>
+  <div class="discover-split">
+    <a class="discover-block kids" href="discover.html?audience=kids">
+      <span class="eyebrow">Kids &amp; families</span>
+      <h3>Children’s activities</h3>
+      <p>Workshops, sport, clubs and days out built for families — tagged by age and theme.</p>
+      <span class="cta">Explore kids <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+    <a class="discover-block general" href="discover.html?audience=general">
+      <span class="eyebrow">General</span>
+      <h3>Community events</h3>
+      <p>Markets, gigs, workshops and more — so you never need to look elsewhere.</p>
+      <span class="cta">Browse general <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
   </div>
 </section>
 
-<div class="grid" id="event-grid">
-  <!-- event cards injected here -->
-</div>
+<section class="value-strip">
+  <div class="section">
+    <div class="section-head">
+      <div>
+        <h2>Built for organisers</h2>
+        <p class="section-subtitle">Go beyond ticketing — structure, insight and a lasting link with attendees.</p>
+      </div>
+      <a href="become-organiser.html">Start listing <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <div class="value-grid">
+      <article class="value-item">
+        <div class="value-icon" aria-hidden="true">
+          <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 0 2-2V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2v6a2 2 0 0 0-2 2v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2a2 2 0 0 0-2-2z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg>
+        </div>
+        <h3>Set up in minutes</h3>
+        <p>Guided templates for creation, ticketing and promotion — built for organisers with little digital experience.</p>
+      </article>
+      <article class="value-item">
+        <div class="value-icon" aria-hidden="true">
+          <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-3"/></svg>
+        </div>
+        <h3>Marketplace intelligence</h3>
+        <p>Demand gaps, retention signals and benchmarking from tagged data across organisers in your area.</p>
+      </article>
+      <article class="value-item">
+        <div class="value-icon" aria-hidden="true">
+          <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-3 3V12a8 8 0 0 1 8-8h3a8 8 0 0 1 8 8z"/></svg>
+        </div>
+        <h3>Stay connected</h3>
+        <p>Message attendees after booking — updates, reminders and re-engagement that spreadsheets can’t do.</p>
+      </article>
+    </div>
+  </div>
+</section>
 
-<footer>
-  <div class="footer-inner">
-    <div class="logo"><span class="dot"></span>Nearby</div>
-    <div class="footer-links">
-      <a href="browse.html">Browse</a>
+<section class="section">
+  <div class="section-head">
+    <div>
+      <h2>Happening soon</h2>
+      <p class="section-subtitle">The latest 10 activities from organisers across Colchester.</p>
+    </div>
+    <a href="discover.html">View all <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+
+  <form class="search-bar" id="search-form">
+    <input type="text" id="search-input" placeholder="Search activities, venues, organisers…" aria-label="Search events">
+    <div class="category-combo" data-category-combo>
+      <input type="hidden" id="category-select" name="category" value="">
+      <button type="button" class="category-combo-trigger" aria-haspopup="listbox" aria-expanded="false">
+        <span class="category-combo-label">All categories</span>
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="category-combo-panel" hidden>
+        <input type="search" class="category-combo-search" placeholder="Search categories…" aria-label="Search categories">
+        <ul class="category-combo-list" role="listbox"></ul>
+      </div>
+    </div>
+    <button type="submit" aria-label="Search">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      Search
+    </button>
+  </form>
+
+  <div class="grid" id="event-grid"></div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a class="logo" href="index.html">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+        </span>
+        Eventorg
+      </a>
+      <p>Connecting activity organisers and families — with marketplace-level insight no single booking tool can generate alone.</p>
+    </div>
+    <div class="footer-col">
+      <h3>Discover</h3>
+      <a href="discover.html?audience=kids">Kids &amp; families</a>
+      <a href="discover.html?audience=general">General</a>
       <a href="categories.html">Categories</a>
+      <a href="discover.html">All activities</a>
+    </div>
+    <div class="footer-col">
+      <h3>Organisers</h3>
+      <a href="organise.html">Create an activity</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="organiser-sales.html">Sales</a>
+      <a href="become-organiser.html">Become an organiser</a>
+    </div>
+    <div class="footer-col">
+      <h3>Account</h3>
+      <a href="my-bookings.html">My bookings</a>
+      <a href="login.html">Log in</a>
       <a href="terms.html">Terms</a>
       <a href="privacy.html">Privacy</a>
     </div>
   </div>
+  <div class="footer-bottom">
+    <span>© 2026 Eventorg</span>
+    <span>Pilot city: Colchester</span>
+  </div>
 </footer>
 
 <script src="js/common.js"></script>
+<script src="js/motion.js"></script>
 <script src="js/index.js"></script>
 </body>
 </html>

@@ -1,113 +1,288 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Eventorg</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/motion.css">
 </head>
-<body>
+<body class="dash-page is-dash-booting">
 
-    <header>
-        <div class="nav-inner">
-            <a class="logo" href="index.html"><span class="dot"></span>Nearby</a>
-            <div class="nav-actions">
-                <a href="login.html" class="btn btn-ghost">Login</a>
+<div id="dash-boot" class="dash-boot" aria-busy="true" aria-live="polite">
+  <div class="dash-boot-shell">
+    <aside class="dash-boot-sidebar">
+      <div class="dash-skel dash-skel-logo"></div>
+      <div class="dash-skel dash-skel-user"></div>
+      <div class="dash-skel dash-skel-nav"></div>
+      <div class="dash-skel dash-skel-nav"></div>
+      <div class="dash-skel dash-skel-nav"></div>
+      <div class="dash-skel dash-skel-nav"></div>
+      <div class="dash-skel dash-skel-cta"></div>
+    </aside>
+    <div class="dash-boot-main">
+      <div class="dash-skel dash-skel-eyebrow"></div>
+      <div class="dash-skel dash-skel-title"></div>
+      <div class="dash-skel dash-skel-lead"></div>
+      <div class="dash-boot-metrics">
+        <div class="dash-skel dash-skel-metric"></div>
+        <div class="dash-skel dash-skel-metric"></div>
+        <div class="dash-skel dash-skel-metric"></div>
+      </div>
+      <div class="dash-skel dash-skel-panel"></div>
+    </div>
+  </div>
+  <p class="dash-boot-label">Loading your dashboard…</p>
+</div>
+
+<div id="dash-gate" class="dash-gate" hidden>
+  <div class="dash-gate-card">
+    <a class="logo dash-gate-logo" href="index.html">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+      </span>
+      Eventorg
+    </a>
+    <h1>Your dashboard</h1>
+    <p>Sign in to manage bookings, list activities, and track organiser performance.</p>
+    <div class="button-row">
+      <a href="login.html?next=dashboard.html" class="btn btn-primary">Log in</a>
+      <a href="register.html" class="btn btn-ghost">Create account</a>
+    </div>
+  </div>
+</div>
+
+<div id="dash-app" class="dash-app" hidden>
+  <aside class="dash-sidebar" id="dash-sidebar" aria-label="Dashboard">
+    <div class="dash-sidebar-top">
+      <a class="logo dash-sidebar-logo" href="index.html">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+        </span>
+        Eventorg
+      </a>
+
+      <div class="dash-user-card">
+        <div class="dash-avatar" id="dash-avatar" aria-hidden="true">?</div>
+        <div class="dash-user-copy">
+          <strong id="dash-sidebar-name">Account</strong>
+          <span id="dash-sidebar-email" class="dash-user-email">—</span>
+          <span class="dash-plan-pill" id="dash-role-pill">attendee</span>
+        </div>
+      </div>
+
+      <nav class="dash-side-nav" id="dash-side-nav">
+        <button type="button" class="dash-nav-item is-active" data-section="overview" data-icon="chart"><span class="dash-nav-ico"></span>Overview</button>
+        <button type="button" class="dash-nav-item" data-section="bookings" data-icon="ticket"><span class="dash-nav-ico"></span>Bookings</button>
+        <button type="button" class="dash-nav-item" data-section="activities" data-icon="calendar" data-org-only hidden><span class="dash-nav-ico"></span>Activities</button>
+        <a class="dash-nav-item" href="organise.html" data-icon="spark" data-org-only hidden id="dash-nav-create"><span class="dash-nav-ico"></span>Create</a>
+        <button type="button" class="dash-nav-item" data-section="sales" data-icon="chart" data-org-only hidden><span class="dash-nav-ico"></span>Sales</button>
+        <button type="button" class="dash-nav-item" data-section="impact" data-icon="chart" data-org-only hidden><span class="dash-nav-ico"></span>Impact report</button>
+        <button type="button" class="dash-nav-item" data-section="discover" data-icon="search"><span class="dash-nav-ico"></span>Discover</button>
+        <button type="button" class="dash-nav-item" data-section="settings" data-icon="settings"><span class="dash-nav-ico"></span>Settings</button>
+      </nav>
+    </div>
+
+    <div class="dash-sidebar-foot">
+      <a href="discover.html" class="btn btn-primary dash-side-cta" id="dash-side-cta">Browse activities</a>
+      <button type="button" class="btn btn-ghost dash-logout-btn" id="dash-logout">Log out</button>
+    </div>
+  </aside>
+
+  <div class="dash-backdrop" id="dash-backdrop" hidden></div>
+
+  <div class="dash-main">
+    <div class="dash-mobile-bar">
+      <button type="button" class="dash-menu-btn" id="dash-sidebar-toggle" aria-label="Open menu">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <a class="logo" href="index.html">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
+        </span>
+        Eventorg
+      </a>
+    </div>
+
+    <div class="dash-main-scroll">
+      <header class="dash-page-head">
+        <p class="dash-eyebrow" id="dash-eyebrow">Account</p>
+        <h1 id="dash-section-title">Overview</h1>
+        <p class="dash-lead" id="dash-subcopy">Your activity at a glance.</p>
+      </header>
+
+      <section class="dash-section is-active" id="section-overview" data-section-panel="overview" aria-label="Overview">
+        <div class="metric-grid" id="dash-metrics" aria-label="Dashboard summary"></div>
+        <div class="dash-overview-grid">
+          <article class="dash-card">
+            <div class="dash-card-head">
+              <h2 id="dash-overview-list-title">Recent</h2>
+              <button type="button" class="dash-text-link" data-goto="bookings" id="dash-overview-goto">View all</button>
             </div>
-        </div>
-    </header>
-
-    <main class="page-container-wide page-stack">
-    <h1>Welcome to Nearby</h1>
-    <p>This is the main landing page of the website.</p>
-
-    <section id="dashboard-shortcuts" class="page-card" aria-label="Dashboard shortcuts"></section>
-
-    <nav aria-label="Quick links">
-        <ul class="quick-links-list">
-            <li><a href="login.html">Login</a></li>
-            <li><a href="register.html">Register</a></li>
-            <li><a href="dashboard.html">Dashboard</a></li>
-            <li><a href="event.html">Event</a></li>
-            <li><a href="browse.html">Browse</a></li>
-            <li><a href="organise.html">Organise</a></li>
-            <li><a href="my-bookings.html">My Bookings</a></li>
-            
-        </ul>
-    </nav>
-
-    <h2>About Us</h2>
-    <p>We are a platform that connects people with events happening
-        near them. Browse, register, and manage your events easily.
-    </p>
-
-    <h2>Contact</h2>
-    <p>If you have any questions, feel free to reach out to us at
-        <a href="mailto:support@nearby.com">support@nearby.com</a>.
-    </p>
-
-    <h2>Featured Events</h2>
-    <div class="event-list">
-        <p>Loading events…</p>
-    </div>
-
-    <!--
-      NOTE: the original page had a SECOND copy of this dialog's content
-      further down in a `.event-details` div, reusing the exact same ids
-      (event-name, event-location, event-time, event-price). HTML ids must
-      be unique — document.getElementById() only ever finds the first
-      match, so that second block was permanently dead/unreachable. It's
-      been removed rather than duplicated.
-    -->
-    <dialog id="event-dialog">
-        <h2>Event Details</h2>
-        <p id="event-name">Event Name: </p>
-        <p id="event-location">Location: </p>
-        <p id="event-time">Time: </p>
-        <p id="event-price">Price: </p>
-        <button id="close-dialog">Close</button>
-    </dialog>
-
-    <h2>Testimonials</h2>
-    <div class="testimonials">
-        <div class="testimonial">
-            <p>"This platform made it so easy to find events in my area. Highly recommend!"</p>
-            <p>- Jane Doe</p>
-        </div>
-        <div class="testimonial">
-            <p>"I love how I can manage my events and see what's happening nearby."</p>
-            <p>- John Smith</p>
-        </div>
-    </div>
-
-    <h2>Newsletter Signup</h2>
-    <form id="newsletter-form">
-        <label for="newsletter-email">Email:</label>
-        <input type="email" id="newsletter-email" name="newsletter-email" required>
-        <button type="submit">Subscribe</button>
-    </form>
-
-    <h2>Follow Us</h2>
-    <div class="social-media">
-        <a href="https://facebook.com/nearby" target="_blank">Facebook</a>
-        <a href="https://twitter.com/nearby" target="_blank">Twitter</a>
-        <a href="https://instagram.com/nearby" target="_blank">Instagram</a>
-    </div>
-    </main>
-
-    <footer>
-        <div class="footer-inner">
-            <div class="logo"><span class="dot"></span>Nearby</div>
-            <div class="footer-links">
-                <a href="browse.html">Browse</a>
-                <a href="categories.html">Categories</a>
-                <a href="terms.html">Terms</a>
-                <a href="privacy.html">Privacy</a>
+            <div id="dash-overview-list"><p class="text-muted">Loading…</p></div>
+          </article>
+          <article class="dash-card">
+            <div class="dash-card-head">
+              <h2>Quick links</h2>
             </div>
+            <div id="dash-overview-links" class="dash-quick-links"></div>
+          </article>
         </div>
-    </footer>
+      </section>
+
+      <section class="dash-section" id="section-bookings" data-section-panel="bookings" aria-label="Bookings" hidden>
+        <article class="dash-card">
+          <div class="dash-card-head">
+            <h2>Your bookings</h2>
+            <a href="my-bookings.html" class="dash-text-link">Open full page</a>
+          </div>
+          <div id="dash-bookings-body"><p class="text-muted">Loading…</p></div>
+        </article>
+      </section>
+
+      <section class="dash-section" id="section-activities" data-section-panel="activities" aria-label="Activities" hidden>
+        <article class="dash-card">
+          <div class="dash-card-head">
+            <h2>Your activities</h2>
+            <a href="organise.html" class="btn btn-primary">Create activity</a>
+          </div>
+          <div id="dash-activities-body"><p class="text-muted">Loading…</p></div>
+        </article>
+      </section>
+
+      <section class="dash-section" id="section-sales" data-section-panel="sales" aria-label="Sales" hidden>
+        <div class="metric-grid" id="dash-sales-metrics" aria-label="Sales summary"></div>
+        <article class="dash-card">
+          <div class="dash-card-head">
+            <h2>Sales tools</h2>
+            <a href="organiser-sales.html" class="dash-text-link">Open full sales</a>
+          </div>
+          <div id="dash-sales-body"></div>
+        </article>
+      </section>
+
+      <section class="dash-section" id="section-impact" data-section-panel="impact" aria-label="Impact report" hidden>
+        <article class="dash-card impact-form-card">
+          <div class="dash-card-head">
+            <h2>Build your impact report</h2>
+          </div>
+          <p class="dash-card-copy">Upload your session CSV and describe your impact goals. We analyse your data and generate a summary you can use for funders and stakeholders.</p>
+
+          <form id="impact-form" class="impact-form" enctype="multipart/form-data">
+            <div class="dash-field">
+              <label for="impact-session-file">Session data (CSV)</label>
+              <label class="impact-dropzone" for="impact-session-file">
+                <input type="file" id="impact-session-file" name="session_file" accept=".csv,text/csv" hidden>
+                <span class="impact-dropzone-icon" aria-hidden="true"></span>
+                <strong>Choose CSV file</strong>
+                <span class="impact-dropzone-hint">or drag a file here · Excel users: Save As → CSV</span>
+                <span class="impact-file-name" id="impact-file-name">No file selected</span>
+              </label>
+            </div>
+
+            <div class="dash-field">
+              <label for="impact-goals">Your impact goals</label>
+              <textarea id="impact-goals" name="goals" rows="6" maxlength="2000" placeholder="Describe what you wanted to achieve — e.g. grow weekly attendance, reach more families in the area, run more outdoor sessions, build a case for grant funding…" required></textarea>
+            </div>
+
+            <div class="button-row">
+              <button type="submit" class="btn btn-primary btn-lg" id="impact-analyze-btn">Analyze &amp; generate report</button>
+            </div>
+            <p id="impact-form-message" class="helper-text hidden-inline"></p>
+          </form>
+
+          <div id="impact-upload-meta" class="impact-upload-meta"></div>
+        </article>
+
+        <article class="dash-card impact-report-card">
+          <div class="dash-card-head">
+            <h2>Impact report</h2>
+          </div>
+          <div id="impact-report-body"><p class="text-muted">Upload a CSV, write your goals, then click <strong>Analyze &amp; generate report</strong>.</p></div>
+        </article>
+      </section>
+
+      <section class="dash-section" id="section-discover" data-section-panel="discover" aria-label="Discover" hidden>
+        <div class="dash-discover-grid">
+          <a class="dash-card dash-discover-card" href="discover.html">
+            <span class="dash-discover-ico" aria-hidden="true" data-discover-icon="search"></span>
+            <strong>All activities</strong>
+            <span>Browse everything happening near you</span>
+          </a>
+          <a class="dash-card dash-discover-card" href="discover.html?audience=kids">
+            <span class="dash-discover-ico" aria-hidden="true" data-discover-icon="users"></span>
+            <strong>Kids &amp; families</strong>
+            <span>Family-friendly activities and workshops</span>
+          </a>
+          <a class="dash-card dash-discover-card" href="discover.html?audience=general">
+            <span class="dash-discover-ico" aria-hidden="true" data-discover-icon="calendar"></span>
+            <strong>General</strong>
+            <span>Community events open to everyone</span>
+          </a>
+          <a class="dash-card dash-discover-card" href="categories.html">
+            <span class="dash-discover-ico" aria-hidden="true" data-discover-icon="spark"></span>
+            <strong>Categories</strong>
+            <span>Music, sports, workshops and more</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="dash-section" id="section-settings" data-section-panel="settings" aria-label="Settings" hidden>
+        <div class="dash-settings-stack">
+          <article class="dash-card dash-settings-card">
+            <div class="dash-card-head">
+              <h2>Account</h2>
+            </div>
+            <div class="dash-account-hero" id="dash-settings-hero">
+              <div class="dash-account-avatar" id="dash-settings-avatar" aria-hidden="true">?</div>
+              <div>
+                <strong id="dash-settings-name">Account</strong>
+                <p id="dash-settings-email" class="text-muted">—</p>
+                <span class="dash-plan-pill" id="dash-settings-role">attendee</span>
+              </div>
+            </div>
+            <div class="dash-field-grid" id="dash-settings-meta"></div>
+          </article>
+
+          <article class="dash-card dash-settings-card">
+            <div class="dash-card-head">
+              <h2>Profile</h2>
+            </div>
+            <form id="dashboard-settings-form" class="dash-profile-form">
+              <div class="dash-field">
+                <label for="dashboard-display-name">Display name</label>
+                <input type="text" id="dashboard-display-name" maxlength="60" placeholder="How you appear on Eventorg" autocomplete="nickname">
+              </div>
+              <div class="dash-field">
+                <label for="dashboard-bio">Bio</label>
+                <textarea id="dashboard-bio" rows="4" maxlength="280" placeholder="A short note about you…"></textarea>
+                <div class="dash-field-hint">
+                  <small id="dashboard-bio-count" class="text-muted">0/280</small>
+                </div>
+              </div>
+              <div class="dash-profile-foot">
+                <p id="dashboard-settings-message" class="helper-text hidden-inline">Saved.</p>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="dash-card dash-settings-card">
+            <div class="dash-card-head">
+              <h2>Security</h2>
+            </div>
+            <p class="dash-card-copy">Reset your password if you need to update sign-in details.</p>
+            <a href="forgot-password.html" class="btn btn-ghost">Reset password</a>
+          </article>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
 
 <script src="js/common.js"></script>
+<script src="js/motion.js"></script>
 <script src="js/dashboard.js"></script>
+<script src="js/impact.js"></script>
 </body>
 </html>

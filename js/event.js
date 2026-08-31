@@ -28,7 +28,7 @@ function formatListDate(dateStr) {
 }
 
 function renderEventList(events) {
-  document.title = 'Events — Nearby';
+  document.title = 'Events — Eventorg';
   document.getElementById('breadcrumb-title').textContent = 'Events';
   document.getElementById('draft-banner-slot').innerHTML = '';
 
@@ -64,7 +64,7 @@ function renderEventList(events) {
           ${statusBadge}
         </div>
         <p class="record-meta">${category} • ${dateLabel}</p>
-        <p class="record-meta">📍 ${venue}</p>
+        <p class="record-meta">${icon('mapPin', 'icon icon-sm')} ${venue}</p>
         <p class="record-meta">By ${organiser}</p>
       </a>`;
   }).join('');
@@ -113,7 +113,7 @@ function renderDraftBanner(ev) {
 }
 
 function renderEvent(ev) {
-  document.title = `${ev.title} — Nearby`;
+  document.title = `${ev.title} — Eventorg`;
   document.getElementById('breadcrumb-title').textContent = ev.title;
   document.getElementById('draft-banner-slot').innerHTML = renderDraftBanner(ev);
 
@@ -130,18 +130,60 @@ function renderEvent(ev) {
   const isOwner = !!(currentUser && Number(currentUser.id) === Number(ev.organiser_id));
 
   const ticketTypes = ev.ticket_types && ev.ticket_types.length > 0 ? ev.ticket_types : [];
+  const isPast = eventHasPassed(ev);
+  const hasTicketTypes = ticketTypes.length > 0;
+  const allSoldOut = hasTicketTypes && ticketTypes.every((t) => {
+    const remaining = Number(t.quantity_available) - Number(t.quantity_sold);
+    return remaining <= 0;
+  });
+  const ticketsUnavailable = isPast || !hasTicketTypes || allSoldOut;
 
-  const ticketRows = ticketTypes.map((t) => {
-    const remaining = t.quantity_available - t.quantity_sold;
-    const soldOut = remaining <= 0;
-    const priceLabel = Number(t.price) === 0
-      ? '<div class="price free">Free</div>'
-      : `<div class="price">£${Number(t.price).toFixed(2)}</div>`;
+  let ticketRows;
+  let checkoutLabel = 'Select tickets to continue';
 
-    return `
-      <div class="ticket-row" data-ticket-id="${t.id}" data-price="${t.price}" data-max="${remaining}">
+  if (isPast) {
+    ticketRows = `<p class="text-muted">This event has already taken place. Tickets are no longer on sale.</p>`;
+    checkoutLabel = 'Event has ended';
+  } else if (!hasTicketTypes) {
+    ticketRows = `<p class="text-muted">Tickets are not available for this event.</p>`;
+    checkoutLabel = 'Not available';
+  } else if (allSoldOut) {
+    ticketRows = `
+      <div class="ticket-soldout-banner">
+        <strong>Sold out</strong>
+        <p class="text-muted">All tickets for this event have been sold.</p>
+      </div>
+      ${ticketTypes.map((t) => {
+        const priceLabel = Number(t.price) === 0
+          ? '<div class="price free">Free</div>'
+          : `<div class="price">£${Number(t.price).toFixed(2)}</div>`;
+        return `
+      <div class="ticket-row is-sold-out" data-ticket-id="${t.id}" data-price="${t.price}" data-max="0">
         <div class="info">
-          <div class="name">${t.name}</div>
+          <div class="name">${escapeHTML(t.name)}</div>
+          ${priceLabel}
+          <div class="stock">Sold out</div>
+        </div>
+        <div class="qty-control">
+          <button class="qty-btn minus" disabled aria-label="Decrease quantity">−</button>
+          <span class="qty-value">0</span>
+          <button class="qty-btn plus" disabled aria-label="Increase quantity">+</button>
+        </div>
+      </div>`;
+      }).join('')}`;
+    checkoutLabel = 'Sold out';
+  } else {
+    ticketRows = ticketTypes.map((t) => {
+      const remaining = Number(t.quantity_available) - Number(t.quantity_sold);
+      const soldOut = remaining <= 0;
+      const priceLabel = Number(t.price) === 0
+        ? '<div class="price free">Free</div>'
+        : `<div class="price">£${Number(t.price).toFixed(2)}</div>`;
+
+      return `
+      <div class="ticket-row${soldOut ? ' is-sold-out' : ''}" data-ticket-id="${t.id}" data-price="${t.price}" data-max="${Math.max(0, remaining)}">
+        <div class="info">
+          <div class="name">${escapeHTML(t.name)}</div>
           ${priceLabel}
           <div class="stock">${soldOut ? 'Sold out' : remaining <= 10 ? `Only ${remaining} left` : 'Available'}</div>
         </div>
@@ -151,16 +193,17 @@ function renderEvent(ev) {
           <button class="qty-btn plus" ${soldOut ? 'disabled' : ''} aria-label="Increase quantity">+</button>
         </div>
       </div>`;
-  }).join('') || `<p class="text-muted">Tickets aren't on sale yet.</p>`;
+    }).join('');
+  }
 
   document.getElementById('page-content').innerHTML = `
     <div class="event-layout">
       <div>
-        <div class="banner">
+        <div class="banner" style="background-image:url('${getEventImageUrl(ev)}'); background-size:cover; background-position:center;">
           <span class="category-tag">${ev.category_name || 'General'}</span>
           <div class="banner-actions">
-            ${isOwner ? `<a href="organise.html?edit=${ev.id}" class="btn btn-ghost">⚙ Manage / Edit</a>` : ''}
-            <button class="save-btn" aria-label="Save event">♡</button>
+            ${isOwner ? `<a href="organise.html?edit=${ev.id}" class="btn btn-ghost">${icon('settings', 'icon icon-sm')} Manage / Edit</a>` : ''}
+            <button class="save-btn" aria-label="Save event">${icon('heart', 'icon')}</button>
           </div>
         </div>
 
@@ -169,15 +212,15 @@ function renderEvent(ev) {
 
           <div class="meta-row">
             <div class="meta-item">
-              <div class="meta-icon">📅</div>
+              <div class="meta-icon">${icon('calendar', 'icon')}</div>
               <div><div class="label">Date</div><div class="value">${start.day}</div></div>
             </div>
             <div class="meta-item">
-              <div class="meta-icon">🕒</div>
+              <div class="meta-icon">${icon('clock', 'icon')}</div>
               <div><div class="label">Time</div><div class="value">${start.time}${end ? ' – ' + end.time : ''}</div></div>
             </div>
             <div class="meta-item">
-              <div class="meta-icon">📍</div>
+              <div class="meta-icon">${icon('mapPin', 'icon')}</div>
               <div><div class="label">Venue</div><div class="value">${ev.venue || 'TBC'}</div></div>
             </div>
           </div>
@@ -196,7 +239,7 @@ function renderEvent(ev) {
 
           <div class="section-title">Location</div>
           <div class="venue-box">
-            <div class="venue-map">Map preview</div>
+            <div class="venue-map">${icon('mapPin', 'icon')} Map preview</div>
             <div class="venue-info">
               <div class="name">${ev.venue || 'Location TBC'}</div>
               <div class="address">${ev.address || 'Full address shown after booking'}</div>
@@ -205,7 +248,7 @@ function renderEvent(ev) {
         </div>
       </div>
 
-      <div class="ticket-panel">
+      <div class="ticket-panel${ticketsUnavailable ? ' is-unavailable' : ''}">
         <h2>Tickets</h2>
         <div id="ticket-rows">${ticketRows}</div>
 
@@ -214,13 +257,13 @@ function renderEvent(ev) {
         <div class="summary-row"><span>Tickets</span><span id="summary-count">0</span></div>
         <div class="summary-row total"><span>Total</span><span id="summary-total">£0.00</span></div>
 
-        <button class="checkout-btn" id="checkout-btn" disabled>Select tickets to continue</button>
+        <button class="checkout-btn" id="checkout-btn" disabled>${checkoutLabel}</button>
         <div class="low-stock-note hidden-inline" id="low-stock-note">Almost sold out — grab yours before they're gone.</div>
       </div>
     </div>
   `;
 
-  attachTicketHandlers(ev.id);
+  if (!ticketsUnavailable) attachTicketHandlers(ev.id);
 }
 
 function attachTicketHandlers(eventId) {
