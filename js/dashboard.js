@@ -1,6 +1,6 @@
 // Requires common.js loaded first.
 
-const API = 'https://darkgoldenrod-reindeer-637131.hostingersite.com/backend';
+const API = 'https://pishnest.co.uk/backend';
 
 const SECTION_META = {
   overview: {
@@ -16,7 +16,7 @@ const SECTION_META = {
   activities: {
     eyebrow: 'Organiser',
     title: 'Activities',
-    sub: 'Create and manage the events you list on Eventorg.'
+    sub: 'Create and manage the events you list on PishNest.'
   },
   sales: {
     eyebrow: 'Organiser',
@@ -36,7 +36,7 @@ const SECTION_META = {
   settings: {
     eyebrow: 'Account',
     title: 'Settings',
-    sub: 'Manage your profile, bio and sign-in options.'
+    sub: 'Manage your profile, bio and sign in options.'
   }
 };
 
@@ -361,10 +361,10 @@ function renderShell(user) {
   const sideCta = document.getElementById('dash-side-cta');
 
   if (sidebarName) sidebarName.textContent = name;
-  if (sidebarEmail) sidebarEmail.textContent = user.email || '—';
+  if (sidebarEmail) sidebarEmail.textContent = user.email || 'None';
   if (rolePill) rolePill.textContent = role;
   if (settingsName) settingsName.textContent = name;
-  if (settingsEmail) settingsEmail.textContent = user.email || '—';
+  if (settingsEmail) settingsEmail.textContent = user.email || 'None';
   if (settingsRole) settingsRole.textContent = role;
 
   const avatar = document.getElementById('dash-avatar');
@@ -394,7 +394,7 @@ function renderShell(user) {
       </div>
       <div class="dash-field-readonly">
         <span class="dash-field-label">Email</span>
-        <span class="dash-field-value">${user.email || '—'}</span>
+        <span class="dash-field-value">${user.email || 'None'}</span>
       </div>
       <div class="dash-field-readonly">
         <span class="dash-field-label">Account type</span>
@@ -445,7 +445,7 @@ function renderOverview() {
         <a href="organise.html"><span class="dash-link-ico" aria-hidden="true">${icon('spark', 'icon icon-sm')}</span><span>Create activity</span></a>
         <button type="button" data-goto="sales"><span class="dash-link-ico" aria-hidden="true">${icon('chart', 'icon icon-sm')}</span><span>View sales</span></button>
         <button type="button" data-goto="impact"><span class="dash-link-ico" aria-hidden="true">${icon('chart', 'icon icon-sm')}</span><span>Impact report</span></button>
-        <a href="discover.html"><span class="dash-link-ico" aria-hidden="true">${icon('search', 'icon icon-sm')}</span><span>Discover</span></a>
+        <a href="discover.html?audience=kids"><span class="dash-link-ico" aria-hidden="true">${icon('search', 'icon icon-sm')}</span><span>Discover</span></a>
         <button type="button" data-goto="settings"><span class="dash-link-ico" aria-hidden="true">${icon('settings', 'icon icon-sm')}</span><span>Settings</span></button>
       `;
     }
@@ -458,7 +458,7 @@ function renderOverview() {
     if (listEl) listEl.innerHTML = bookingCards(upcoming, 4);
     if (linksEl) {
       linksEl.innerHTML = `
-        <a href="discover.html"><span class="dash-link-ico" aria-hidden="true">${icon('search', 'icon icon-sm')}</span><span>Discover activities</span></a>
+        <a href="discover.html?audience=kids"><span class="dash-link-ico" aria-hidden="true">${icon('search', 'icon icon-sm')}</span><span>Discover activities</span></a>
         <a href="discover.html?audience=kids"><span class="dash-link-ico" aria-hidden="true">${icon('users', 'icon icon-sm')}</span><span>Kids &amp; families</span></a>
         <a href="become-organiser.html#organiser-signup"><span class="dash-link-ico" aria-hidden="true">${icon('spark', 'icon icon-sm')}</span><span>Become an organiser</span></a>
         <button type="button" data-goto="settings"><span class="dash-link-ico" aria-hidden="true">${icon('settings', 'icon icon-sm')}</span><span>Settings</span></button>

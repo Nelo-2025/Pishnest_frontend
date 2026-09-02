@@ -99,7 +99,7 @@ function renderBookings(bookings) {
         <div class="record-head">
           <div>
             <h3>${row.event_title}</h3>
-            <p class="record-meta">Attendee: ${row.attendee_name || 'Unknown'} (${row.attendee_email || 'no-email'})</p>
+            <p class="record-meta">Attendee: ${row.attendee_name || 'Unknown'} (${row.attendee_email || 'no email'})</p>
           </div>
           <span class="status-pill">${status || 'unknown'}</span>
         </div>
@@ -123,7 +123,7 @@ function renderBookings(bookings) {
       if (!window.confirm(promptText)) return;
 
       btn.disabled = true;
-      const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/organiser-bookings.php`, {
+      const data = await fetchJSON(`https://pishnest.co.uk/backend/organiser-bookings.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, order_id: orderId })
@@ -145,7 +145,7 @@ async function loadSalesData(eventId = '') {
   const query = new URLSearchParams();
   if (eventId) query.set('event_id', String(eventId));
 
-  const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/organiser-bookings.php${query.toString() ? `?${query.toString()}` : ''}`);
+  const data = await fetchJSON(`https://pishnest.co.uk/backend/organiser-bookings.php${query.toString() ? `?${query.toString()}` : ''}`);
   if (!data || !data.success) {
     renderSummary({});
     renderEventPerformance([]);

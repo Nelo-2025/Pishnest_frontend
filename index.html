@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eventorg — Activities for families in Colchester</title>
+<title>PishNest, Kids &amp; family activities in Essex</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="css/style.css" rel="stylesheet">
@@ -13,20 +13,9 @@
 
 <header class="site-header">
   <div class="nav-inner">
-    <a class="logo" href="index.html">
-      <span class="logo-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
-      </span>
-      Eventorg
-    </a>
+    <a class="logo" href="index.html" aria-label="PishNest"><img src="assets/logo.jpeg" alt="" class="logo-img" aria-hidden="true"><span class="logo-wordmark">PishNest</span></a>
     <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
-    <nav class="nav-links" aria-label="Primary">
-      <a href="discover.html?audience=kids" aria-current="page">Kids</a>
-      <a href="discover.html?audience=general">General</a>
-      <a href="categories.html">Categories</a>
-      <a href="organise.html" id="organise-link">For organisers</a>
-      <a href="my-bookings.html">Bookings</a>
-    </nav>
+    <nav class="nav-links" aria-label="Primary"></nav>
     <div class="nav-actions" id="nav-actions">
       <a href="login.html" class="btn btn-ghost">Log in</a>
       <a href="register.html" class="btn btn-primary">Sign up</a>
@@ -34,7 +23,7 @@
   </div>
 </header>
 
-<section class="hero">
+<section class="hero hero-compact">
   <div class="hero-media" aria-hidden="true">
     <video autoplay muted loop playsinline poster="assets/media/events/kids.jpg">
       <source src="assets/media/hero-events.mp4" type="video/mp4">
@@ -43,65 +32,79 @@
   </div>
   <div class="hero-inner">
     <div class="hero-copy">
-      <div class="brand-lockup">
-        <span class="logo-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
-        </span>
-        Eventorg
-      </div>
-      <h1>Find the right activity <span class="mark">near you</span></h1>
-      <p class="hero-lead">Discover and book children’s activities and local events in one place — starting in Colchester.</p>
-      <div class="hero-actions">
-        <a href="discover.html?audience=kids" class="btn btn-yellow">Browse kids activities</a>
-        <a href="become-organiser.html" class="btn btn-ghost-light">Become an Organiser</a>
-      </div>
+      <p class="hero-kicker">Essex, Kids &amp; families</p>
+      <h1>Find children’s activities <span class="mark">in Essex</span></h1>
+      <p class="hero-lead">Search and book family events nearby. We’re launching in Essex first, more regions later.</p>
     </div>
 
-    <div class="hero-visual">
-      <div class="hero-accent" aria-hidden="true"></div>
-      <a class="hero-panel" href="discover.html?audience=kids">
-        <div class="hero-panel-image">
-          <img src="assets/media/events/kids.jpg" alt="Children enjoying an outdoor activity">
+    <form class="search-bar hero-search" id="search-form">
+      <input type="search" id="search-input" name="q" placeholder="Search activities, venues, organisers…" aria-label="Search activities">
+      <div class="category-combo" data-category-combo>
+        <input type="hidden" id="category-select" name="category" value="">
+        <button type="button" class="category-combo-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="category-combo-label">All categories</span>
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="category-combo-panel" hidden>
+          <input type="search" class="category-combo-search" placeholder="Search categories…" aria-label="Search categories">
+          <ul class="category-combo-list" role="listbox"></ul>
         </div>
-        <div class="hero-panel-body">
-          <div class="hero-panel-top">
-            <span class="hero-pill">This Saturday · Colchester</span>
-          </div>
-          <h3>Forest School Adventure</h3>
-          <div class="hero-panel-meta">
-            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 1 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Castle Park, Colchester</div>
-            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 10:00 – 12:00 · Ages 5–9</div>
-          </div>
-          <div class="hero-panel-foot">
-            <div class="price">£8</div>
-            <span>Book instantly</span>
-          </div>
-        </div>
-      </a>
+      </div>
+      <input type="date" id="date-select" name="date" aria-label="Activity date">
+      <button type="submit" aria-label="Search">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        Search
+      </button>
+    </form>
+
+    <div class="region-pills" aria-label="Launch region">
+      <span class="region-pill is-active">Essex</span>
+      <span class="region-pill is-disabled" title="Coming after Essex">More regions soon</span>
     </div>
   </div>
 </section>
 
-<section class="section">
+<section class="section section-discover" id="happening">
   <div class="section-head">
     <div>
-      <h2>Discover in two places</h2>
-      <p class="section-subtitle">Kids activities and the wider local calendar — one hub for families.</p>
+      <h2>Happening for families in Essex</h2>
+      <p class="section-subtitle" id="home-results-copy">Latest activities from organisers, launching with Essex families first.</p>
+    </div>
+    <a href="discover.html">View all <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+
+  <div class="grid" id="event-grid"></div>
+</section>
+
+<section class="section family-points">
+  <div class="section-head">
+    <div>
+      <h2>Built for Essex families</h2>
+      <p class="section-subtitle">Book a Saturday club without the extra steps, then expand when we’re ready.</p>
     </div>
   </div>
-  <div class="discover-split">
-    <a class="discover-block kids" href="discover.html?audience=kids">
-      <span class="eyebrow">Kids &amp; families</span>
-      <h3>Children’s activities</h3>
-      <p>Workshops, sport, clubs and days out built for families — tagged by age and theme.</p>
-      <span class="cta">Explore kids <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-    </a>
-    <a class="discover-block general" href="discover.html?audience=general">
-      <span class="eyebrow">General</span>
-      <h3>Community events</h3>
-      <p>Markets, gigs, workshops and more — so you never need to look elsewhere.</p>
-      <span class="cta">Browse general <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-    </a>
+  <div class="value-grid">
+    <article class="value-item">
+      <div class="value-icon" aria-hidden="true">
+        <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </div>
+      <h3>Search first</h3>
+      <p>Find activities by name, category and date as soon as you arrive, no hunting through the page.</p>
+    </article>
+    <article class="value-item">
+      <div class="value-icon" aria-hidden="true">
+        <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h3>Book without an account</h3>
+      <p>Name and email are enough to book. Create an account only if you want to manage tickets later.</p>
+    </article>
+    <article class="value-item">
+      <div class="value-icon" aria-hidden="true">
+        <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.2-7-11a7 7 0 1 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      </div>
+      <h3>Essex first</h3>
+      <p>We’re focused on children’s and family events in Essex before adding other regions or audiences.</p>
+    </article>
   </div>
 </section>
 
@@ -109,8 +112,8 @@
   <div class="section">
     <div class="section-head">
       <div>
-        <h2>Built for organisers</h2>
-        <p class="section-subtitle">Go beyond ticketing — structure, insight and a lasting link with attendees.</p>
+        <h2>Run activities for Essex families</h2>
+        <p class="section-subtitle">List kids’ clubs, workshops and days out where local families are already searching.</p>
       </div>
       <a href="become-organiser.html">Start listing <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
@@ -120,7 +123,7 @@
           <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 0 2-2V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2v6a2 2 0 0 0-2 2v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2a2 2 0 0 0-2-2z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg>
         </div>
         <h3>Set up in minutes</h3>
-        <p>Guided templates for creation, ticketing and promotion — built for organisers with little digital experience.</p>
+        <p>Guided templates for creation, ticketing and promotion, built for organisers with little digital experience.</p>
       </article>
       <article class="value-item">
         <div class="value-icon" aria-hidden="true">
@@ -134,66 +137,30 @@
           <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-3 3V12a8 8 0 0 1 8-8h3a8 8 0 0 1 8 8z"/></svg>
         </div>
         <h3>Stay connected</h3>
-        <p>Message attendees after booking — updates, reminders and re-engagement that spreadsheets can’t do.</p>
+        <p>Message attendees after booking, updates, reminders and re engagement that spreadsheets can’t do.</p>
       </article>
     </div>
   </div>
 </section>
 
-<section class="section">
-  <div class="section-head">
-    <div>
-      <h2>Happening soon</h2>
-      <p class="section-subtitle">The latest 10 activities from organisers across Colchester.</p>
-    </div>
-    <a href="discover.html">View all <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-  </div>
-
-  <form class="search-bar" id="search-form">
-    <input type="text" id="search-input" placeholder="Search activities, venues, organisers…" aria-label="Search events">
-    <div class="category-combo" data-category-combo>
-      <input type="hidden" id="category-select" name="category" value="">
-      <button type="button" class="category-combo-trigger" aria-haspopup="listbox" aria-expanded="false">
-        <span class="category-combo-label">All categories</span>
-        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="category-combo-panel" hidden>
-        <input type="search" class="category-combo-search" placeholder="Search categories…" aria-label="Search categories">
-        <ul class="category-combo-list" role="listbox"></ul>
-      </div>
-    </div>
-    <button type="submit" aria-label="Search">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      Search
-    </button>
-  </form>
-
-  <div class="grid" id="event-grid"></div>
-</section>
-
 <footer class="site-footer">
   <div class="footer-grid">
     <div class="footer-brand">
-      <a class="logo" href="index.html">
-        <span class="logo-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
-        </span>
-        Eventorg
-      </a>
-      <p>Connecting activity organisers and families — with marketplace-level insight no single booking tool can generate alone.</p>
+      <a class="logo" href="index.html" aria-label="PishNest"><img src="assets/logo.jpeg" alt="" class="logo-img" aria-hidden="true"><span class="logo-wordmark">PishNest</span></a>
+      <p>Connecting Essex activity organisers with families looking for children’s events nearby.</p>
     </div>
     <div class="footer-col">
       <h3>Discover</h3>
       <a href="discover.html?audience=kids">Kids &amp; families</a>
-      <a href="discover.html?audience=general">General</a>
       <a href="categories.html">Categories</a>
-      <a href="discover.html">All activities</a>
+      <a href="discover.html?audience=kids">Essex activities</a>
     </div>
     <div class="footer-col">
       <h3>Organisers</h3>
       <a href="organise.html">Create an activity</a>
       <a href="dashboard.html">Dashboard</a>
       <a href="organiser-sales.html">Sales</a>
+      <a href="pricing.html">Pricing</a>
       <a href="become-organiser.html">Become an organiser</a>
     </div>
     <div class="footer-col">
@@ -205,8 +172,8 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 Eventorg</span>
-    <span>Pilot city: Colchester</span>
+    <span>© 2026 PishNest</span>
+    <span>Launch region: Essex</span>
   </div>
 </footer>
 

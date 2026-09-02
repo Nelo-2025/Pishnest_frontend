@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse — Eventorg</title>
-    <meta http-equiv="refresh" content="0; url=discover.html">
+    <title>Browse, PishNest</title>
+    <meta http-equiv="refresh" content="0; url=discover.html?audience=kids">
     <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/motion.css">
-    <script>window.location.replace('discover.html' + window.location.search);</script>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (!params.get('audience')) params.set('audience', 'kids');
+      window.location.replace('discover.html?' + params.toString());
+    </script>
 </head>
 <body>
-  <p style="padding:2rem;text-align:center;">Redirecting to <a href="discover.html">Discover</a>…</p>
+  <p style="padding:2rem;text-align:center;">Redirecting to <a href="discover.html?audience=kids">Discover</a>…</p>
 <script src="js/motion.js"></script>
 </body>
 </html>

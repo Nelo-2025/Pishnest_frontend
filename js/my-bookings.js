@@ -30,7 +30,7 @@ function renderBookings(orders) {
       <div class="empty-state">
         <h3>No bookings yet</h3>
         <p>You have not booked any tickets yet.</p>
-        <a class="btn btn-primary" href="discover.html">Discover activities</a>
+        <a class="btn btn-primary" href="discover.html?audience=kids">Discover activities</a>
       </div>`;
     return;
   }
@@ -73,7 +73,7 @@ function renderBookings(orders) {
       if (!ok) return;
 
       btn.disabled = true;
-      const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/orders.php`, {
+      const data = await fetchJSON(`https://pishnest.co.uk/backend/orders.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'cancel', order_id: orderId })
@@ -91,7 +91,7 @@ function renderBookings(orders) {
 }
 
 async function loadMyBookings() {
-  const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/orders.php`);
+  const data = await fetchJSON(`https://pishnest.co.uk/backend/orders.php`);
   if (!data || !data.success) {
     renderBookings([]);
     showBookingsMessage((data && data.error) || 'Could not load your bookings.', true);

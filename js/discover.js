@@ -1,7 +1,7 @@
 // Requires common.js loaded first.
 
-const KIDS_KEYWORDS = /\b(kid|kids|child|children|family|families|junior|toddler|youth|school|ages?\s*\d)\b/i;
 const PAGE_SIZE = 9;
+const DEFAULT_AUDIENCE = '';
 
 let filteredEvents = [];
 let currentPage = 1;
@@ -18,6 +18,10 @@ function getFiltersFromForm() {
 function syncFiltersToUrl(filters, page) {
   const params = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {
+    if (key === 'audience') {
+      params.set('audience', value || 'all');
+      return;
+    }
     if (value) params.set(key, value);
   });
   if (page > 1) params.set('page', String(page));
@@ -28,42 +32,15 @@ function syncFiltersToUrl(filters, page) {
 function applyFiltersFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const section = (params.get('section') || '').toLowerCase();
-  const audience = params.get('audience') || (section === 'kids' || section === 'general' ? section : '');
+  const rawAudience = params.get('audience') || (section === 'kids' || section === 'general' ? section : '');
+  const audience = rawAudience === 'all' ? '' : rawAudience;
   const page = Math.max(1, parseInt(params.get('page') || '1', 10) || 1);
 
   document.getElementById('discover-q').value = params.get('q') || '';
-  document.getElementById('discover-audience').value = audience;
+  document.getElementById('discover-audience').value = audience || DEFAULT_AUDIENCE;
   document.getElementById('discover-date').value = params.get('date') || params.get('from') || '';
   currentPage = page;
   return params.get('category') || '';
-}
-
-function matchesAudience(ev, audience) {
-  if (!audience) return true;
-  const haystack = [ev.title, ev.description, ev.category_name, ev.venue].filter(Boolean).join(' ');
-  const looksKids = KIDS_KEYWORDS.test(haystack);
-  if (audience === 'kids') return looksKids;
-  if (audience === 'general') return !looksKids;
-  return true;
-}
-
-function matchesEventDate(ev, date) {
-  if (!date) return true;
-  const start = new Date(ev.start_datetime);
-  if (isNaN(start)) return true;
-  const yyyy = start.getFullYear();
-  const mm = String(start.getMonth() + 1).padStart(2, '0');
-  const dd = String(start.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}` === date;
-}
-
-function sortEventsNewestFirst(events) {
-  return [...events].sort((a, b) => {
-    const aTime = new Date(a.start_datetime || 0).getTime();
-    const bTime = new Date(b.start_datetime || 0).getTime();
-    if (bTime !== aTime) return bTime - aTime;
-    return Number(b.id || 0) - Number(a.id || 0);
-  });
 }
 
 function getTotalPages() {
@@ -141,7 +118,7 @@ function renderCurrentPage() {
       const end = Math.min(currentPage * PAGE_SIZE, filteredEvents.length);
       countEl.textContent = filteredEvents.length === 1
         ? '1 activity found'
-        : `Showing ${start}–${end} of ${filteredEvents.length} activities`;
+        : `Showing ${start} to ${end} of ${filteredEvents.length} activities`;
     }
   }
 
@@ -157,7 +134,7 @@ function renderCurrentPage() {
 }
 
 async function loadCategories(selectedCategory) {
-  const raw = await fetchJSON('https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/categories.php');
+  const raw = await fetchJSON('https://pishnest.co.uk/backend/categories.php');
   const categories = Array.isArray(raw)
     ? raw
     : ((raw && Array.isArray(raw.categories)) ? raw.categories : []);
@@ -190,12 +167,12 @@ async function loadDiscoverEvents({ resetPage = true } = {}) {
     ...(filters.category && { category: filters.category })
   }).toString();
 
-  const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/events.php${query ? `?${query}` : ''}`);
+  const data = await fetchJSON(`https://pishnest.co.uk/backend/events.php${query ? `?${query}` : ''}`);
   let events = Array.isArray(data)
     ? data
     : ((data && Array.isArray(data.events)) ? data.events : ((data && Array.isArray(data.data)) ? data.data : []));
 
-  filteredEvents = sortEventsNewestFirst(events
+  filteredEvents = sortEventsUpcomingFirst(events
     .filter((ev) => matchesAudience(ev, filters.audience))
     .filter((ev) => matchesEventDate(ev, filters.date)));
 
@@ -213,7 +190,7 @@ async function setupDiscoverPage() {
 
   document.getElementById('discover-reset').addEventListener('click', () => {
     document.getElementById('discover-q').value = '';
-    document.getElementById('discover-audience').value = '';
+    document.getElementById('discover-audience').value = DEFAULT_AUDIENCE;
     document.getElementById('discover-date').value = '';
     const categoryHidden = document.getElementById('discover-category');
     if (categoryHidden) categoryHidden.value = '';

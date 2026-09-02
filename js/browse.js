@@ -2,7 +2,7 @@
 
 function formatDateBadge(dateStr) {
   const d = new Date(dateStr);
-  if (isNaN(d)) return { day: '--', month: '---' };
+  if (isNaN(d)) return { day: '?', month: '???' };
   return { day: d.getDate(), month: d.toLocaleString('en-GB', { month: 'short' }).toUpperCase() };
 }
 
@@ -37,16 +37,16 @@ async function loadEvents() {
   const leadEl = document.getElementById('browse-lead');
   if (section === 'kids') {
     if (titleEl) titleEl.textContent = 'Kids activities';
-    if (leadEl) leadEl.textContent = 'Children’s activities and events — tagged for age, theme and family-friendly discovery.';
-    document.title = 'Kids activities — Eventorg';
+    if (leadEl) leadEl.textContent = 'Children’s activities and events, tagged for age, theme and family friendly discovery.';
+    document.title = 'Kids activities, PishNest';
   } else if (section === 'general') {
     if (titleEl) titleEl.textContent = 'General events';
-    if (leadEl) leadEl.textContent = 'The wider local calendar — markets, gigs, community events and more.';
-    document.title = 'General events — Eventorg';
+    if (leadEl) leadEl.textContent = 'The wider local calendar, markets, gigs, community events and more.';
+    document.title = 'General events, PishNest';
   }
 
   const query = new URLSearchParams({ ...(category && { category }), ...(q && { q }) }).toString();
-  const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/events.php${query ? '?' + query : ''}`);
+  const data = await fetchJSON(`https://pishnest.co.uk/backend/events.php${query ? '?' + query : ''}`);
   const events = Array.isArray(data)
     ? data
     : ((data && Array.isArray(data.events)) ? data.events : ((data && Array.isArray(data.data)) ? data.data : []));
