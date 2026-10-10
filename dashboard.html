@@ -170,16 +170,16 @@
 
         <article id="impact-create-panel" class="dash-card impact-form-card" hidden>
           <button type="button" class="btn btn-ghost impact-back-btn" id="impact-back-to-list">← Back to reports</button>
-          <p class="dash-card-copy">Upload your session data as CSV, Excel, or Word, then describe your impact goals. We analyse your data and generate a summary you can use for funders and stakeholders.</p>
+          <p class="dash-card-copy">Upload your session CSV and describe your impact goals. We analyse your data and generate a summary you can use for funders and stakeholders.</p>
 
           <form id="impact-form" class="impact-form" enctype="multipart/form-data">
             <div class="dash-field">
-              <label for="impact-session-file">Session data</label>
+              <label for="impact-session-file">Session data (CSV)</label>
               <label class="impact-dropzone" for="impact-session-file">
-                <input type="file" id="impact-session-file" name="session_file" accept=".csv,.tsv,.txt,.xlsx,.xlsm,.docx,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+                <input type="file" id="impact-session-file" name="session_file" accept=".csv,text/csv" hidden>
                 <span class="impact-dropzone-icon" aria-hidden="true"></span>
-                <strong>Choose a file</strong>
-                <span class="impact-dropzone-hint">CSV, Excel (.xlsx), or Word (.docx)</span>
+                <strong>Choose CSV file</strong>
+                <span class="impact-dropzone-hint">or drag a file here, Excel users: Save As → CSV</span>
                 <span class="impact-file-name" id="impact-file-name">No file selected</span>
               </label>
             </div>
@@ -199,10 +199,7 @@
         </article>
 
         <article id="impact-detail-panel" class="dash-card impact-report-card" hidden>
-          <div class="impact-detail-toolbar">
-            <button type="button" class="btn btn-ghost impact-back-btn" id="impact-back-from-detail">← Back to reports</button>
-            <button type="button" class="btn btn-primary" id="impact-download-btn" hidden>Download Report</button>
-          </div>
+          <button type="button" class="btn btn-ghost impact-back-btn" id="impact-back-from-detail">← Back to reports</button>
           <div id="impact-report-body" class="impact-report-body"></div>
         </article>
       </section>

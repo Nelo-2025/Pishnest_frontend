@@ -39,6 +39,10 @@ async function loadEvents() {
     if (titleEl) titleEl.textContent = 'Kids activities';
     if (leadEl) leadEl.textContent = 'Children’s activities and events, tagged for age, theme and family friendly discovery.';
     document.title = 'Kids activities, PishNest';
+  } else if (section === 'general') {
+    if (titleEl) titleEl.textContent = 'General events';
+    if (leadEl) leadEl.textContent = 'The wider local calendar, markets, gigs, community events and more.';
+    document.title = 'General events, PishNest';
   }
 
   const query = new URLSearchParams({ ...(category && { category }), ...(q && { q }) }).toString();

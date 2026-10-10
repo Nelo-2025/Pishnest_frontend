@@ -34,8 +34,6 @@ function getPostLoginRedirect() {
   const next = params.get('next') || '';
   if (next.includes('checkout.html')) {
     lead.textContent = 'Log in to finish this booking. You can also go back and book as a guest with just your name and email.';
-  } else if (next.includes('my-bookings.html')) {
-    lead.textContent = 'Log in to view and manage your bookings.';
   }
 })();
 

@@ -191,7 +191,7 @@ document.getElementById('checkout-form').addEventListener('submit', async (event
 
   if (data && data.login_required) {
     showCheckoutMessage(
-      `${data.error || 'Please log in to complete this booking.'} <a class="btn btn-primary" href="login.html?next=${encodeURIComponent('checkout.html')}">Log in to complete your booking</a>`,
+      `${data.error || 'Please log in to complete this booking.'} <a href="login.html?next=${encodeURIComponent('checkout.html')}">Log in</a>`,
       true
     );
   } else {

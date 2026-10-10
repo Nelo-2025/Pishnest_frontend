@@ -33,7 +33,7 @@ function applyFiltersFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const section = (params.get('section') || '').toLowerCase();
   const rawAudience = params.get('audience') || (section === 'kids' || section === 'general' ? section : '');
-  const audience = rawAudience === 'all' || rawAudience === 'general' ? '' : rawAudience;
+  const audience = rawAudience === 'all' ? '' : rawAudience;
   const page = Math.max(1, parseInt(params.get('page') || '1', 10) || 1);
 
   document.getElementById('discover-q').value = params.get('q') || '';

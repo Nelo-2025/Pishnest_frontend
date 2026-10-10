@@ -30,10 +30,6 @@ const ICON_PATHS = {
   ticket: '<path d="M3 9a2 2 0 0 0 2-2V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2v6a2 2 0 0 0-2 2v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2a2 2 0 0 0-2-2z"/><path d="M13 5v2M13 11v2M13 17v2"/>',
   spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
-  sparkles: '<path d="M10 3l1.9 5.6L17.5 10.5l-5.6 1.9L10 18l-1.9-5.6L2.5 10.5l5.6-1.9z"/><path d="M19 3v4M17 5h4M19 16v4M17 18h4"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>',
-  send: '<path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
-  history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>',
   eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
   eyeOff: '<path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A10.5 10.5 0 0 1 12 5c6.5 0 10 7 10 7a17.4 17.4 0 0 1-3.2 4.1"/><path d="M6.1 6.1C3.7 7.8 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.4-1"/>'
 };
@@ -364,6 +360,7 @@ function matchesAudience(ev, audience) {
   if (!audience) return true;
   const looksKids = KIDS_KEYWORDS.test(eventSearchHaystack(ev));
   if (audience === 'kids') return looksKids;
+  if (audience === 'general') return !looksKids;
   return true;
 }
 
@@ -427,25 +424,13 @@ function renderPrimaryNav() {
 
   const file = getCurrentPageFile().toLowerCase();
 
-  const organiserActive = file === 'become-organiser.html';
-  const bookActive = file === 'discover.html' || file === 'browse.html';
-  const impactActive = false;
-  const assistantActive = false;
+  const discoverActive = file === 'discover.html' || file === 'browse.html' || file === 'index.html';
+  const categoriesActive = file === 'categories.html';
 
   nav.innerHTML = `
-    <a class="nav-link${organiserActive ? ' is-active' : ''}" data-nav-organiser="true" href="become-organiser.html"${organiserActive ? ' aria-current="page"' : ''}>Become an Organiser</a>
-    <a class="nav-link${bookActive ? ' is-active' : ''}" href="discover.html"${bookActive ? ' aria-current="page"' : ''}>Book Event</a>
-    <a class="nav-link${impactActive ? ' is-active' : ''}" href="dashboard.html#impact">Impact Report</a>
-    <a class="nav-link${assistantActive ? ' is-active' : ''}" data-nav-assistant="true" href="#organiser-assistant" hidden>Organiser Assistant</a>
+    <a class="nav-link${discoverActive ? ' is-active' : ''}" href="discover.html"${discoverActive ? ' aria-current="page"' : ''}>Discover</a>
+    <a class="nav-link${categoriesActive ? ' is-active' : ''}" href="categories.html"${categoriesActive ? ' aria-current="page"' : ''}>Categories</a>
   `;
-
-  nav.querySelectorAll('a').forEach((link) => {
-    const text = String(link.textContent || '').trim().toLowerCase();
-    const href = String(link.getAttribute('href') || '').toLowerCase();
-    if (text === 'general' || href.includes('audience=general') || href.includes('section=general')) {
-      link.remove();
-    }
-  });
 
   ensureNavCluster();
 }
@@ -572,26 +557,6 @@ function renderHeaderAuthUI(currentUser) {
     organiserCta.style.color = '#fff';
   }
 
-  // "Become an Organiser" now lives in the main nav links, so the extra
-  // header button is hidden to avoid showing it twice.
-  const navOrganiserLink = document.querySelector('.nav-links [data-nav-organiser="true"]');
-  const navAssistantLink = document.querySelector('.nav-links [data-nav-assistant="true"]');
-  if (organiserCta) organiserCta.style.display = 'none';
-
-  // Kilo (the assistant) only exists for logged-in organisers: the nav link
-  // is hidden and the floating button is removed for everyone else.
-  const isOrganiser = !!(currentUser && isOrganiserRole(currentUser));
-  if (navAssistantLink) {
-    navAssistantLink.hidden = !isOrganiser;
-    if (isOrganiser) {
-      navAssistantLink.href = '#organiser-assistant';
-      navAssistantLink.setAttribute('data-open-assistant', 'true');
-    } else {
-      navAssistantLink.removeAttribute('data-open-assistant');
-    }
-  }
-  if (!isOrganiser) removeAssistantWidget();
-
   if (currentUser) {
     welcomeEl.textContent = '';
     welcomeEl.classList.add('hidden-inline');
@@ -600,9 +565,13 @@ function renderHeaderAuthUI(currentUser) {
     authLink.href = 'dashboard.html';
     authLink.onclick = null;
 
-    if (navOrganiserLink && isOrganiserRole(currentUser)) {
-      navOrganiserLink.textContent = 'List an activity';
-      navOrganiserLink.href = 'organise.html';
+    if (organiserCta) {
+      if (isOrganiserRole(currentUser)) {
+        organiserCta.textContent = 'List an activity';
+        organiserCta.href = 'organise.html';
+        // Prefer dashboard as the main organiser home from header Dashboard link.
+      }
+      organiserCta.style.display = '';
     }
     return;
   }
@@ -614,10 +583,7 @@ function renderHeaderAuthUI(currentUser) {
   authLink.href = `login.html?next=${encodeURIComponent(getCurrentPagePath())}`;
   authLink.onclick = null;
 
-  if (navOrganiserLink) {
-    navOrganiserLink.textContent = 'Become an Organiser';
-    navOrganiserLink.href = file === 'become-organiser.html' ? '#organiser-signup' : 'become-organiser.html';
-  }
+  if (organiserCta) organiserCta.style.display = '';
 }
 
 let headerAuthSyncPromise = null;
@@ -840,68 +806,10 @@ async function populateCategories(onSelect) {
   return categories;
 }
 
-// Floating Organiser Assistant (organisers only). Loaded on demand so other
-// visitors never download it.
-const ASSISTANT_HIDDEN_PAGES = ['login.html', 'register.html', 'verify-email.html', 'forgot-password.html'];
-let assistantScriptPromise = null;
-
-function loadAssistantWidget() {
-  if (window.openOrganiserAssistant) return Promise.resolve();
-  if (!assistantScriptPromise) {
-    assistantScriptPromise = new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'js/assistant.js';
-      script.onload = resolve;
-      script.onerror = () => {
-        assistantScriptPromise = null;
-        reject(new Error('Could not load the assistant.'));
-      };
-      document.body.appendChild(script);
-    });
-  }
-  return assistantScriptPromise;
-}
-
-function removeAssistantWidget() {
-  const widget = document.getElementById('pn-assistant');
-  if (widget) widget.remove();
-  delete window.openOrganiserAssistant;
-  delete window.closeOrganiserAssistant;
-  assistantScriptPromise = null;
-}
-
-// If the user logs out (or changes account) in another tab, update this one.
-window.addEventListener('storage', (event) => {
-  if (event.key !== USER_STORAGE_KEY && event.key !== null) return;
-  const user = getCurrentUser();
-  renderHeaderAuthUI(user);
-  if (user && isOrganiserRole(user) && !ASSISTANT_HIDDEN_PAGES.includes(getCurrentPageFile().toLowerCase())) {
-    loadAssistantWidget().catch(() => {});
-  }
-});
-
-document.addEventListener('click', (event) => {
-  const trigger = event.target.closest('[data-open-assistant]');
-  if (!trigger) return;
-  event.preventDefault();
-  document.querySelector('.site-header, header')?.classList.remove('is-open');
-  loadAssistantWidget().then(() => {
-    if (window.openOrganiserAssistant) window.openOrganiserAssistant();
-  }).catch(() => {});
-});
-
 document.addEventListener('DOMContentLoaded', () => {
   applySiteBranding();
   renderPrimaryNav();
   setupMobileNav();
   setupPasswordToggles();
-  syncHeaderAuthUI()
-    .then((user) => {
-      if (user && isOrganiserRole(user) && !ASSISTANT_HIDDEN_PAGES.includes(getCurrentPageFile().toLowerCase())) {
-        return loadAssistantWidget();
-      }
-      return null;
-    })
-    .catch(() => {})
-    .finally(() => ensureNavCluster());
+  syncHeaderAuthUI().finally(() => ensureNavCluster());
 });
