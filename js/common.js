@@ -1,7 +1,7 @@
 // Shared across pages. Include this BEFORE any page-specific script.
 //
 // IMPORTANT ARCHITECTURE NOTE:
-// Real auth is enforced server-side via the PHP session cookie — every
+// Real auth is enforced server-side via the PHP session cookie, every
 // protected endpoint (organise.php, update-event.php, checkout.php) checks
 // $_SESSION on the server, so a user can never fake their way into an
 // action just by editing browser storage.
@@ -11,7 +11,7 @@
 // having to call the server on every single page load. It is fetched once
 // from me.php right after login and cached client-side. If it ever falls
 // out of sync with the real session (e.g. the session expired), the
-// server-side check on the actual action will still correctly reject it —
+// server-side check on the actual action will still correctly reject it -
 // this cache only controls what buttons/links are shown, not what's
 // actually allowed.
 
@@ -30,9 +30,16 @@ const ICON_PATHS = {
   ticket: '<path d="M3 9a2 2 0 0 0 2-2V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2v6a2 2 0 0 0-2 2v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2a2 2 0 0 0-2-2z"/><path d="M13 5v2M13 11v2M13 17v2"/>',
   spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  sparkles: '<path d="M10 3l1.9 5.6L17.5 10.5l-5.6 1.9L10 18l-1.9-5.6L2.5 10.5l5.6-1.9z"/><path d="M19 3v4M17 5h4M19 16v4M17 18h4"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  send: '<path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+  history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>',
   eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
   eyeOff: '<path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A10.5 10.5 0 0 1 12 5c6.5 0 10 7 10 7a17.4 17.4 0 0 1-3.2 4.1"/><path d="M6.1 6.1C3.7 7.8 2 12 2 12s3.5 7 10 7a9.8 9.8 0 0 0 4.4-1"/>'
 };
+
+const SITE_NAME = 'PishNest';
+const LOGO_SRC = 'assets/logo.jpeg';
 
 function icon(name, className = 'icon') {
   const paths = ICON_PATHS[name];
@@ -40,8 +47,46 @@ function icon(name, className = 'icon') {
   return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true">${paths}</svg>`;
 }
 
+function logoInnerHtml() {
+  return `<img src="${LOGO_SRC}" alt="" class="logo-img" aria-hidden="true"><span class="logo-wordmark">${SITE_NAME}</span>`;
+}
+
+function logoHtml(href = 'index.html', extraClass = '') {
+  const cls = ['logo', extraClass].filter(Boolean).join(' ');
+  return `<a class="${cls}" href="${href}" aria-label="${SITE_NAME}">${logoInnerHtml()}</a>`;
+}
+
 function logoMarkHtml() {
-  return `<span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg></span>`;
+  return `<img src="${LOGO_SRC}" alt="" class="logo-img logo-img-mark" aria-hidden="true">`;
+}
+
+function applySiteBranding() {
+  document.querySelectorAll('a.logo').forEach((link) => {
+    if (link.querySelector('.logo-wordmark')) return;
+    const img = link.querySelector('.logo-img');
+    if (img) {
+      img.setAttribute('alt', '');
+      img.setAttribute('aria-hidden', 'true');
+      if (!link.querySelector('.logo-wordmark')) {
+        img.insertAdjacentHTML('afterend', `<span class="logo-wordmark">${SITE_NAME}</span>`);
+      }
+    } else {
+      link.innerHTML = logoInnerHtml();
+    }
+    if (!link.getAttribute('aria-label')) {
+      link.setAttribute('aria-label', SITE_NAME);
+    }
+  });
+
+  document.querySelectorAll('.brand-lockup').forEach((lockup) => {
+    if (lockup.querySelector('.logo-wordmark')) return;
+    const img = lockup.querySelector('.logo-img');
+    if (img) {
+      img.insertAdjacentHTML('afterend', `<span class="logo-wordmark">${SITE_NAME}</span>`);
+    } else {
+      lockup.innerHTML = `<img src="${LOGO_SRC}" alt="" class="logo-img logo-img-hero" aria-hidden="true"><span class="logo-wordmark">${SITE_NAME}</span>`;
+    }
+  });
 }
 
 function setupPasswordToggles() {
@@ -98,7 +143,7 @@ function setupMobileNav() {
 }
 
 // Central backend URL used by all pages.
-const DEFAULT_API_BASE = 'https://darkgoldenrod-reindeer-637131.hostingersite.com/backend';
+const DEFAULT_API_BASE = 'https://pishnest.co.uk/backend';
 const SAME_HOST_NO_PORT_API_BASE = DEFAULT_API_BASE;
 const LOCALHOST_API_BASE = DEFAULT_API_BASE;
 const LOOPBACK_API_BASE = DEFAULT_API_BASE;
@@ -289,7 +334,7 @@ function getEventImageUrl(ev) {
 
 function formatDateBadge(dateStr) {
   const d = new Date(dateStr);
-  if (isNaN(d)) return { day: '--', month: '---' };
+  if (isNaN(d)) return { day: '?', month: '???' };
   return { day: d.getDate(), month: d.toLocaleString('en-GB', { month: 'short' }).toUpperCase() };
 }
 
@@ -304,6 +349,51 @@ function eventHasPassed(ev) {
   if (!cutoff) return false;
   const d = new Date(String(cutoff).replace(' ', 'T'));
   return !isNaN(d.getTime()) && d.getTime() < Date.now();
+}
+
+const KIDS_KEYWORDS = /\b(kid|kids|child|children|family|families|junior|toddler|youth|school|ages?\s*\d)\b/i;
+const ESSEX_KEYWORDS = /\b(essex|colchester|chelmsford|southend|basildon|harlow|brentwood|clacton|witham|braintree|maldon|rayleigh|epping|grays|thurrock|billericay|wickford|loughton|saffron walden|canvey|halstead|tendring|castle park)\b/i;
+
+function eventSearchHaystack(ev) {
+  return [ev && ev.title, ev && ev.description, ev && ev.category_name, ev && ev.venue, ev && ev.address]
+    .filter(Boolean)
+    .join(' ');
+}
+
+function matchesAudience(ev, audience) {
+  if (!audience) return true;
+  const looksKids = KIDS_KEYWORDS.test(eventSearchHaystack(ev));
+  if (audience === 'kids') return looksKids;
+  return true;
+}
+
+function matchesRegion(ev, region) {
+  if (!region || region === 'all') return true;
+  if (region !== 'essex') return true;
+  return ESSEX_KEYWORDS.test(eventSearchHaystack(ev));
+}
+
+function matchesEventDate(ev, date) {
+  if (!date) return true;
+  const start = new Date(ev && ev.start_datetime);
+  if (isNaN(start)) return true;
+  const yyyy = start.getFullYear();
+  const mm = String(start.getMonth() + 1).padStart(2, '0');
+  const dd = String(start.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}` === date;
+}
+
+function sortEventsUpcomingFirst(events) {
+  const now = Date.now();
+  return [...events].sort((a, b) => {
+    const aTime = new Date((a && a.start_datetime) || 0).getTime();
+    const bTime = new Date((b && b.start_datetime) || 0).getTime();
+    const aPast = aTime < now;
+    const bPast = bTime < now;
+    if (aPast !== bPast) return aPast ? 1 : -1;
+    if (aTime !== bTime) return aTime - bTime;
+    return Number((a && a.id) || 0) - Number((b && b.id) || 0);
+  });
 }
 
 function renderEventCard(ev) {
@@ -336,18 +426,26 @@ function renderPrimaryNav() {
   if (!nav) return;
 
   const file = getCurrentPageFile().toLowerCase();
-  const params = new URLSearchParams(window.location.search);
-  const audience = (params.get('audience') || '').toLowerCase();
 
-  const discoverActive = (file === 'discover.html' || file === 'browse.html') && !audience;
-  const kidsActive = file === 'discover.html' && audience === 'kids';
-  const generalActive = file === 'discover.html' && audience === 'general';
+  const organiserActive = file === 'become-organiser.html';
+  const bookActive = file === 'discover.html' || file === 'browse.html';
+  const impactActive = false;
+  const assistantActive = false;
 
   nav.innerHTML = `
-    <a class="nav-link${discoverActive ? ' is-active' : ''}" href="discover.html"${discoverActive ? ' aria-current="page"' : ''}>Discover</a>
-    <a class="nav-link${kidsActive ? ' is-active' : ''}" href="discover.html?audience=kids"${kidsActive ? ' aria-current="page"' : ''}>Kids &amp; families</a>
-    <a class="nav-link${generalActive ? ' is-active' : ''}" href="discover.html?audience=general"${generalActive ? ' aria-current="page"' : ''}>General</a>
+    <a class="nav-link${organiserActive ? ' is-active' : ''}" data-nav-organiser="true" href="become-organiser.html"${organiserActive ? ' aria-current="page"' : ''}>Become an Organiser</a>
+    <a class="nav-link${bookActive ? ' is-active' : ''}" href="discover.html"${bookActive ? ' aria-current="page"' : ''}>Book Event</a>
+    <a class="nav-link${impactActive ? ' is-active' : ''}" href="dashboard.html#impact">Impact Report</a>
+    <a class="nav-link${assistantActive ? ' is-active' : ''}" data-nav-assistant="true" href="#organiser-assistant" hidden>Organiser Assistant</a>
   `;
+
+  nav.querySelectorAll('a').forEach((link) => {
+    const text = String(link.textContent || '').trim().toLowerCase();
+    const href = String(link.getAttribute('href') || '').toLowerCase();
+    if (text === 'general' || href.includes('audience=general') || href.includes('section=general')) {
+      link.remove();
+    }
+  });
 
   ensureNavCluster();
 }
@@ -474,6 +572,26 @@ function renderHeaderAuthUI(currentUser) {
     organiserCta.style.color = '#fff';
   }
 
+  // "Become an Organiser" now lives in the main nav links, so the extra
+  // header button is hidden to avoid showing it twice.
+  const navOrganiserLink = document.querySelector('.nav-links [data-nav-organiser="true"]');
+  const navAssistantLink = document.querySelector('.nav-links [data-nav-assistant="true"]');
+  if (organiserCta) organiserCta.style.display = 'none';
+
+  // Kilo (the assistant) only exists for logged-in organisers: the nav link
+  // is hidden and the floating button is removed for everyone else.
+  const isOrganiser = !!(currentUser && isOrganiserRole(currentUser));
+  if (navAssistantLink) {
+    navAssistantLink.hidden = !isOrganiser;
+    if (isOrganiser) {
+      navAssistantLink.href = '#organiser-assistant';
+      navAssistantLink.setAttribute('data-open-assistant', 'true');
+    } else {
+      navAssistantLink.removeAttribute('data-open-assistant');
+    }
+  }
+  if (!isOrganiser) removeAssistantWidget();
+
   if (currentUser) {
     welcomeEl.textContent = '';
     welcomeEl.classList.add('hidden-inline');
@@ -482,13 +600,9 @@ function renderHeaderAuthUI(currentUser) {
     authLink.href = 'dashboard.html';
     authLink.onclick = null;
 
-    if (organiserCta) {
-      if (isOrganiserRole(currentUser)) {
-        organiserCta.textContent = 'List an activity';
-        organiserCta.href = 'organise.html';
-        // Prefer dashboard as the main organiser home from header Dashboard link.
-      }
-      organiserCta.style.display = '';
+    if (navOrganiserLink && isOrganiserRole(currentUser)) {
+      navOrganiserLink.textContent = 'List an activity';
+      navOrganiserLink.href = 'organise.html';
     }
     return;
   }
@@ -500,7 +614,10 @@ function renderHeaderAuthUI(currentUser) {
   authLink.href = `login.html?next=${encodeURIComponent(getCurrentPagePath())}`;
   authLink.onclick = null;
 
-  if (organiserCta) organiserCta.style.display = '';
+  if (navOrganiserLink) {
+    navOrganiserLink.textContent = 'Become an Organiser';
+    navOrganiserLink.href = file === 'become-organiser.html' ? '#organiser-signup' : 'become-organiser.html';
+  }
 }
 
 let headerAuthSyncPromise = null;
@@ -559,6 +676,7 @@ async function fetchJSON(url, options) {
       }
 
       lastFailure = {
+        ...(data && typeof data === 'object' ? data : {}),
         success: false,
         error: (data && (data.error || data.message)) || `Request failed: ${res.status}`,
         status: res.status
@@ -586,7 +704,7 @@ async function fetchJSON(url, options) {
 // state reliably (dashboard, organise, event pages).
 async function refreshCurrentUser() {
   const cachedUser = getCurrentUser();
-  const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/me.php`);
+  const data = await fetchJSON(`https://pishnest.co.uk/backend/me.php`);
 
   if (data && data.success && data.user) {
     setCurrentUser(data.user);
@@ -600,7 +718,7 @@ async function refreshCurrentUser() {
 }
 
 async function logout() {
-  await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/logout.php`, { method: 'POST' });
+  await fetchJSON(`https://pishnest.co.uk/backend/logout.php`, { method: 'POST' });
   clearCurrentUser();
   window.location.href = 'index.html';
 }
@@ -694,7 +812,7 @@ function setupCategoryCombo(root, categories, { onSelect, initialValue = '' } = 
 // searchable [data-category-combo] dropdowns. Calls onSelect(categoryId)
 // when a combo option is chosen.
 async function populateCategories(onSelect) {
-  const rawCategories = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/categories.php`);
+  const rawCategories = await fetchJSON(`https://pishnest.co.uk/backend/categories.php`);
   const categories = Array.isArray(rawCategories)
     ? rawCategories
     : ((rawCategories && Array.isArray(rawCategories.categories)) ? rawCategories.categories : []);
@@ -722,9 +840,68 @@ async function populateCategories(onSelect) {
   return categories;
 }
 
+// Floating Organiser Assistant (organisers only). Loaded on demand so other
+// visitors never download it.
+const ASSISTANT_HIDDEN_PAGES = ['login.html', 'register.html', 'verify-email.html', 'forgot-password.html'];
+let assistantScriptPromise = null;
+
+function loadAssistantWidget() {
+  if (window.openOrganiserAssistant) return Promise.resolve();
+  if (!assistantScriptPromise) {
+    assistantScriptPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'js/assistant.js';
+      script.onload = resolve;
+      script.onerror = () => {
+        assistantScriptPromise = null;
+        reject(new Error('Could not load the assistant.'));
+      };
+      document.body.appendChild(script);
+    });
+  }
+  return assistantScriptPromise;
+}
+
+function removeAssistantWidget() {
+  const widget = document.getElementById('pn-assistant');
+  if (widget) widget.remove();
+  delete window.openOrganiserAssistant;
+  delete window.closeOrganiserAssistant;
+  assistantScriptPromise = null;
+}
+
+// If the user logs out (or changes account) in another tab, update this one.
+window.addEventListener('storage', (event) => {
+  if (event.key !== USER_STORAGE_KEY && event.key !== null) return;
+  const user = getCurrentUser();
+  renderHeaderAuthUI(user);
+  if (user && isOrganiserRole(user) && !ASSISTANT_HIDDEN_PAGES.includes(getCurrentPageFile().toLowerCase())) {
+    loadAssistantWidget().catch(() => {});
+  }
+});
+
+document.addEventListener('click', (event) => {
+  const trigger = event.target.closest('[data-open-assistant]');
+  if (!trigger) return;
+  event.preventDefault();
+  document.querySelector('.site-header, header')?.classList.remove('is-open');
+  loadAssistantWidget().then(() => {
+    if (window.openOrganiserAssistant) window.openOrganiserAssistant();
+  }).catch(() => {});
+});
+
 document.addEventListener('DOMContentLoaded', () => {
+  applySiteBranding();
   renderPrimaryNav();
   setupMobileNav();
   setupPasswordToggles();
-  syncHeaderAuthUI().finally(() => ensureNavCluster());
+  syncHeaderAuthUI()
+    .then((user) => {
+      if (user && isOrganiserRole(user) && !ASSISTANT_HIDDEN_PAGES.includes(getCurrentPageFile().toLowerCase())) {
+        return loadAssistantWidget();
+      }
+      return null;
+    })
+    .catch(() => {})
+    .finally(() => ensureNavCluster());
 });

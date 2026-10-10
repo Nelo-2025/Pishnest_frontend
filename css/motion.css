@@ -1,4 +1,4 @@
-/* Intentional motion — hierarchy and presence, not noise */
+/* Intentional motion - hierarchy and presence, not noise */
 
 @media (prefers-reduced-motion: reduce){
   *,
@@ -231,12 +231,13 @@ button[type="submit"]:active{
 }
 
 /* Nav */
-.logo-mark{
-  transition:transform .25s cubic-bezier(.22,1,.36,1);
+.logo-img{
+  transition:opacity .2s ease, transform .25s cubic-bezier(.22,1,.36,1);
 }
 
-.logo:hover .logo-mark{
-  transform:rotate(-8deg) scale(1.06);
+.logo:hover .logo-img{
+  opacity:0.9;
+  transform:scale(1.02);
 }
 
 .nav-link{

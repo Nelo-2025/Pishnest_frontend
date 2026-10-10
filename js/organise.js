@@ -39,7 +39,7 @@ function fillOrganiseShell(user) {
     const roleEl = document.getElementById('dash-role-pill');
     const avatar = document.getElementById('dash-avatar');
     if (nameEl) nameEl.textContent = name;
-    if (emailEl) emailEl.textContent = user.email || '—';
+    if (emailEl) emailEl.textContent = user.email || 'None';
     if (roleEl) roleEl.textContent = normalizeRole(user.role) || 'organiser';
     if (avatar) avatar.textContent = String(name).charAt(0).toUpperCase() || '?';
 
@@ -206,10 +206,10 @@ function updatePreview() {
     const descInput = document.getElementById('event-description');
 
     document.getElementById('preview-name').textContent = nameInput.value.trim() || 'Event Name';
-    document.getElementById('preview-location').textContent = 'Location: ' + (locationInput.value.trim() || '—');
-    document.getElementById('preview-date').textContent = 'Date: ' + (dateInput.value || '—');
-    document.getElementById('preview-time').textContent = 'Time: ' + (timeInput.value || '—');
-    document.getElementById('preview-description').textContent = 'Description: ' + (descInput.value.trim() || '—');
+    document.getElementById('preview-location').textContent = 'Location: ' + (locationInput.value.trim() || 'None');
+    document.getElementById('preview-date').textContent = 'Date: ' + (dateInput.value || 'None');
+    document.getElementById('preview-time').textContent = 'Time: ' + (timeInput.value || 'None');
+    document.getElementById('preview-description').textContent = 'Description: ' + (descInput.value.trim() || 'None');
 }
 
 ['event-name', 'event-venue', 'event-startdatetime', 'event-enddatetime', 'event-description']
@@ -223,7 +223,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const editEventId = urlParams.get('edit') || urlParams.get('id');
 
 async function loadEventForEditing(id) {
-    const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/event.php?id=${encodeURIComponent(id)}`);
+    const data = await fetchJSON(`https://pishnest.co.uk/backend/event.php?id=${encodeURIComponent(id)}`);
     if (!data || !data.success || !data.event) {
         showNotice("Could not load this event for editing.", true);
         return;
@@ -307,7 +307,7 @@ async function handleSubmit(event) {
         ticket_types: JSON.stringify(ticketTypes)
     };
 
-    const endpoint = editEventId ? `https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/update-event.php` : `https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/organise.php`;
+    const endpoint = editEventId ? `https://pishnest.co.uk/backend/update-event.php` : `https://pishnest.co.uk/backend/organise.php`;
     const submitBtn = document.getElementById('organise-event');
     submitBtn.disabled = true;
 
@@ -344,7 +344,7 @@ async function handleSubmit(event) {
         if (!targetId) {
             // Fallback: some backend responses return success without event_id.
             // Resolve the newest matching event for this organiser.
-            const listData = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/events.php`);
+            const listData = await fetchJSON(`https://pishnest.co.uk/backend/events.php`);
             const allEvents = Array.isArray(listData)
                 ? listData
                 : ((listData && Array.isArray(listData.events)) ? listData.events : []);
@@ -410,7 +410,7 @@ async function handleSubmit(event) {
         if (formHeading) formHeading.textContent = 'Update details';
         if (lead) lead.textContent = 'Change the listing details, then save. Drafts stay private until you publish.';
         if (submitBtn) submitBtn.textContent = 'Save changes';
-        document.title = 'Edit activity — Eventorg';
+        document.title = 'Edit activity, PishNest';
         await loadEventForEditing(editEventId);
     }
 

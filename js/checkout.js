@@ -2,15 +2,44 @@
 
 function fillCheckoutContactFields() {
   const user = getCurrentUser();
-  if (!user) return;
-
   const nameInput = document.getElementById('name');
   const emailInput = document.getElementById('email');
-  if (nameInput && !nameInput.value) {
-    nameInput.value = String(user.name || user.full_name || getUserDisplayName(user) || '').trim();
+  const loginRow = document.getElementById('checkout-login-row');
+  const lead = document.getElementById('checkout-lead');
+  const optIn = document.getElementById('create-account-label');
+  const fields = document.getElementById('create-account-fields');
+  const createAccount = document.getElementById('create-account');
+
+  if (user) {
+    if (nameInput && !nameInput.value) {
+      nameInput.value = String(user.name || user.full_name || getUserDisplayName(user) || '').trim();
+    }
+    if (emailInput && !emailInput.value) {
+      emailInput.value = String(user.email || '').trim();
+    }
+    if (loginRow) loginRow.hidden = true;
+    if (optIn) optIn.hidden = true;
+    if (fields) fields.hidden = true;
+    if (createAccount) createAccount.checked = false;
+    if (lead) lead.textContent = 'Confirm your details to finish this booking.';
+    return;
   }
-  if (emailInput && !emailInput.value) {
-    emailInput.value = String(user.email || '').trim();
+
+  if (loginRow) loginRow.hidden = false;
+  if (optIn) optIn.hidden = false;
+  if (lead) lead.textContent = 'Book with your name and email, an account is optional.';
+}
+
+function toggleCreateAccountFields() {
+  const checkbox = document.getElementById('create-account');
+  const fields = document.getElementById('create-account-fields');
+  const password = document.getElementById('checkout-password');
+  if (!checkbox || !fields) return;
+  const show = checkbox.checked && !getCurrentUser();
+  fields.hidden = !show;
+  if (password) {
+    password.required = show;
+    if (!show) password.value = '';
   }
 }
 
@@ -20,12 +49,12 @@ async function loadOrderSummary() {
   const items = JSON.parse(sessionStorage.getItem('checkout_items') || 'null');
 
   if (!eventId || !items || items.length === 0) {
-    summaryEl.innerHTML = `<p>No tickets selected. <a href="index.html">Browse events</a> to pick some first.</p>`;
+    summaryEl.innerHTML = `<p>No tickets selected. <a href="discover.html?audience=kids">Browse activities</a> to pick some first.</p>`;
     document.getElementById('checkout-submit').disabled = true;
     return;
   }
 
-  const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/event.php?id=${encodeURIComponent(eventId)}`);
+  const data = await fetchJSON(`https://pishnest.co.uk/backend/event.php?id=${encodeURIComponent(eventId)}`);
   if (!data || !data.success || !data.event) {
     summaryEl.innerHTML = `<p>Could not load this event.</p>`;
     document.getElementById('checkout-submit').disabled = true;
@@ -38,7 +67,7 @@ async function loadOrderSummary() {
     summaryEl.innerHTML = `
       <h3 class="order-summary-title">${ev.title}</h3>
       <p class="form-notice error" style="display:block">This event has already taken place. Tickets are no longer available.</p>
-      <p><a href="event.html?id=${encodeURIComponent(eventId)}">Back to event</a> · <a href="discover.html">Browse events</a></p>
+      <p><a href="event.html?id=${encodeURIComponent(eventId)}">Back to event</a>, <a href="discover.html?audience=kids">Browse activities</a></p>
     `;
     document.getElementById('checkout-submit').disabled = true;
     sessionStorage.removeItem('checkout_event_id');
@@ -52,7 +81,7 @@ async function loadOrderSummary() {
     const price = ticket ? Number(ticket.price) : 0;
     const lineTotal = price * item.quantity;
     total += lineTotal;
-    return `<p>${item.quantity} × ${ticket ? ticket.name : 'Ticket'} — £${lineTotal.toFixed(2)}</p>`;
+    return `<p>${item.quantity} × ${ticket ? ticket.name : 'Ticket'}, £${lineTotal.toFixed(2)}</p>`;
   }).join('');
 
   summaryEl.innerHTML = `
@@ -65,10 +94,12 @@ async function loadOrderSummary() {
 
 function showCheckoutMessage(msg, isError = false) {
   const el = document.getElementById('checkout-message');
-  el.textContent = msg;
+  el.innerHTML = msg;
   el.className = `form-notice ${isError ? 'error' : 'success'}`;
   el.style.display = 'block';
 }
+
+document.getElementById('create-account')?.addEventListener('change', toggleCreateAccountFields);
 
 document.getElementById('checkout-form').addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -85,8 +116,21 @@ document.getElementById('checkout-form').addEventListener('submit', async (event
     return;
   }
 
-  if (!getCurrentUser()) {
-    window.location.href = `login.html?next=${encodeURIComponent('checkout.html')}`;
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const createAccount = !!(document.getElementById('create-account') && document.getElementById('create-account').checked && !getCurrentUser());
+  const password = (document.getElementById('checkout-password') && document.getElementById('checkout-password').value) || '';
+
+  if (!name || !email) {
+    showCheckoutMessage('Please enter your name and email to complete this booking.', true);
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showCheckoutMessage('Please enter a valid email address.', true);
+    return;
+  }
+  if (createAccount && password.length < 6) {
+    showCheckoutMessage('Choose a password of at least 6 characters, or leave account creation unticked.', true);
     return;
   }
 
@@ -94,8 +138,7 @@ document.getElementById('checkout-form').addEventListener('submit', async (event
   submitBtn.disabled = true;
   submitBtn.textContent = 'Processing…';
 
-  // Frontend-only guards (no backend deploy needed).
-  const eventData = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/event.php?id=${encodeURIComponent(eventId)}`);
+  const eventData = await fetchJSON(`https://pishnest.co.uk/backend/event.php?id=${encodeURIComponent(eventId)}`);
   const ev = eventData && eventData.event;
   if (!ev || eventHasPassed(ev)) {
     showCheckoutMessage('This event has already taken place. Tickets are no longer available.', true);
@@ -114,35 +157,54 @@ document.getElementById('checkout-form').addEventListener('submit', async (event
     return remaining < Number(item.quantity);
   });
   if (soldOutOrShort) {
-    showCheckoutMessage('Sorry — those tickets are sold out or no longer available.', true);
+    showCheckoutMessage('Sorry, those tickets are sold out or no longer available.', true);
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Confirm booking (demo — no payment taken)';
+    submitBtn.textContent = 'Confirm booking (demo, no payment taken)';
     return;
   }
 
-  const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/checkout.php`, {
+  const data = await fetchJSON(`https://pishnest.co.uk/backend/checkout.php`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ event_id: eventId, items })
+    body: JSON.stringify({
+      event_id: eventId,
+      items,
+      name,
+      email,
+      create_account: createAccount,
+      password: createAccount ? password : undefined
+    })
   });
 
   if (data && data.success) {
+    if (data.session_token) setSessionToken(data.session_token);
+    if (data.user) setCurrentUser(data.user);
     sessionStorage.setItem('last_order_id', data.order_id);
     sessionStorage.setItem('last_order_total', data.total_amount);
+    sessionStorage.setItem('last_order_guest', data.guest ? '1' : '0');
+    sessionStorage.setItem('last_order_email', email);
     sessionStorage.removeItem('checkout_event_id');
     sessionStorage.removeItem('checkout_items');
-    document.getElementById('checkout-form').reset();
     window.location.href = 'confirmation.html';
+    return;
+  }
+
+  if (data && data.login_required) {
+    showCheckoutMessage(
+      `${data.error || 'Please log in to complete this booking.'} <a class="btn btn-primary" href="login.html?next=${encodeURIComponent('checkout.html')}">Log in to complete your booking</a>`,
+      true
+    );
   } else {
     showCheckoutMessage((data && data.error) || 'Checkout failed. Please try again.', true);
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Confirm booking (demo — no payment taken)';
   }
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Confirm booking (demo, no payment taken)';
 });
 
 (async () => {
   await refreshCurrentUser();
   fillCheckoutContactFields();
+  toggleCreateAccountFields();
   await syncHeaderAuthUI(getCurrentUser());
   loadOrderSummary();
 })();

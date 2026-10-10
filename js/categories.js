@@ -2,7 +2,7 @@
 
 (async () => {
   const listEl = document.getElementById('category-list');
-  const categories = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/categories.php`);
+  const categories = await fetchJSON(`https://pishnest.co.uk/backend/categories.php`);
 
   if (!Array.isArray(categories) || categories.length === 0) {
     listEl.innerHTML = '<li>No categories found.</li>';

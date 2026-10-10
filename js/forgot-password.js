@@ -26,7 +26,7 @@ if (forgotForm) {
       return;
     }
 
-    const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/forgot-password.php`, {
+    const data = await fetchJSON(`https://pishnest.co.uk/backend/forgot-password.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ action: 'request', email })
@@ -38,9 +38,9 @@ if (forgotForm) {
       forgotForm.querySelector('button[type="submit"]').disabled = true;
 
       // dev_code is only present because there's no real email server in
-      // this project — remove this line once you wire up actual email
+      // this project, remove this line once you wire up actual email
       // sending, and don't return dev_code from the backend either.
-      const devNote = data.dev_code ? ` (dev mode — your code is ${data.dev_code})` : '';
+      const devNote = data.dev_code ? ` (dev mode, your code is ${data.dev_code})` : '';
       showMessage('forgot-message', `Verification code generated for ${email}.${devNote}`, true);
     } else {
       showMessage('forgot-message', (data && data.message) || 'Something went wrong.');
@@ -53,7 +53,7 @@ if (verifyForm) {
     event.preventDefault();
     const code = document.getElementById('verification-code').value.trim();
 
-    const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/forgot-password.php`, {
+    const data = await fetchJSON(`https://pishnest.co.uk/backend/forgot-password.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ action: 'verify', email: pendingEmail, code })
@@ -78,7 +78,7 @@ if (resetForm) {
       return;
     }
 
-    const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/forgot-password.php`, {
+    const data = await fetchJSON(`https://pishnest.co.uk/backend/forgot-password.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ action: 'reset', new_password: newPassword })

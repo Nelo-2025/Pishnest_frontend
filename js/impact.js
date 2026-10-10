@@ -1,9 +1,12 @@
-// Impact report — single form: CSV + goals textarea + Analyze.
+// Impact report, list hub, create form, detail view.
 
 (function () {
-  const API = typeof API_BASE !== 'undefined' ? API_BASE : 'https://darkgoldenrod-reindeer-637131.hostingersite.com/backend';
+  const API = typeof API_BASE !== 'undefined' ? API_BASE : 'https://pishnest.co.uk/backend';
+  const PAGE_SIZE = 12;
 
   let impactBound = false;
+  let impactPage = 1;
+  let lastImpactReport = null;
 
   function impactEl(id) {
     return document.getElementById(id);
@@ -23,6 +26,36 @@
     el.classList.remove('hidden-inline');
     el.classList.toggle('notice', !!isError);
     el.classList.toggle('helper-text', !isError);
+  }
+
+  function setImpactView(view) {
+    const hub = impactEl('impact-hub');
+    const create = impactEl('impact-create-panel');
+    const detail = impactEl('impact-detail-panel');
+    if (hub) hub.hidden = view !== 'list';
+    if (create) create.hidden = view !== 'create';
+    if (detail) detail.hidden = view !== 'detail';
+    window.impactView = view;
+    const downloadBtn = impactEl('impact-download-btn');
+    if (downloadBtn) downloadBtn.hidden = view !== 'detail' || !lastImpactReport;
+    updateImpactPageHead(view);
+  }
+
+  function updateImpactPageHead(view) {
+    const title = document.getElementById('dash-section-title');
+    const subcopy = document.getElementById('dash-subcopy');
+    if (!title || !subcopy) return;
+
+    if (view === 'create') {
+      title.textContent = 'Create impact report';
+      subcopy.textContent = 'Upload session data and describe the goals you want to measure.';
+    } else if (view === 'detail') {
+      title.textContent = 'Impact report';
+      subcopy.textContent = 'Review your summary, charts, and goal assessment.';
+    } else {
+      title.textContent = 'Impact report';
+      subcopy.textContent = 'Upload session data, set goals, and generate charts and summaries for funders.';
+    }
   }
 
   async function postImpactFormData(formData) {
@@ -46,7 +79,7 @@
         if (res.ok && data.success !== false) {
           return data;
         }
-        lastError = new Error(data.error || `Request failed (${res.status}).`);
+        lastError = new Error(data.error || data.message || `Request failed (${res.status}).`);
         if (res.status !== 404 && res.status !== 405) break;
       } catch (err) {
         lastError = err;
@@ -56,30 +89,350 @@
     throw lastError;
   }
 
-  async function fetchImpactReport() {
-    return fetchJSON(`${API}/impact.php`);
+  async function fetchImpactOverview(page) {
+    const p = Math.max(1, page || 1);
+    return fetchJSON(`${API}/impact.php?page=${encodeURIComponent(p)}`);
+  }
+
+  async function fetchImpactReport(reportId) {
+    return fetchJSON(`${API}/impact.php?report_id=${encodeURIComponent(reportId)}&page=${encodeURIComponent(impactPage)}`);
+  }
+
+  function parseCalendarDate(value) {
+    if (!value) return null;
+    const s = String(value).trim();
+    const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) {
+      return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+    }
+    const d = new Date(s.includes('T') ? s : s.replace(' ', 'T'));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  function formatCalendarDate(value) {
+    const d = parseCalendarDate(value);
+    if (!d) return value || '';
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function formatReportDate(iso) {
+    const d = parseCalendarDate(iso);
+    if (!d) return iso || '';
+    const hasTime = /[ T]\d{2}:\d{2}/.test(String(iso || ''));
+    if (!hasTime) return formatCalendarDate(iso);
+    return d.toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function formatReportDateShort(iso) {
+    return formatCalendarDate(iso);
+  }
+
+  function reportDateRangeLabel(report) {
+    const summary = report && report.summary ? report.summary : {};
+    if (summary.date_range_label) return summary.date_range_label;
+    if (summary.date_from && summary.date_to) {
+      const from = formatCalendarDate(summary.date_from);
+      const to = formatCalendarDate(summary.date_to);
+      return from === to ? from : `${from} to ${to}`;
+    }
+    return '';
+  }
+
+  function renderImpactEmpty() {
+    const empty = impactEl('impact-empty');
+    const listWrap = impactEl('impact-list-wrap');
+    if (empty) empty.hidden = false;
+    if (listWrap) listWrap.hidden = true;
+
+    const iconWrap = empty ? empty.querySelector('.impact-empty-icon') : null;
+    if (iconWrap && typeof icon === 'function') {
+      iconWrap.innerHTML = icon('chart', 'icon icon-lg');
+    }
+  }
+
+  function renderImpactCard(item) {
+    const when = formatReportDateShort(item.created_at);
+    const file = item.original_filename ? escapeHtml(item.original_filename) : 'Session data';
+    const rows = item.row_count ? `${item.row_count} rows` : '';
+    const goals = item.goals_preview ? escapeHtml(item.goals_preview) : 'Impact report';
+
+    return `
+      <button type="button" class="impact-card" data-report-id="${item.id}">
+        <div class="impact-card-top">
+          <span class="impact-card-icon" aria-hidden="true">${typeof icon === 'function' ? icon('chart', 'icon') : ''}</span>
+          <span class="impact-card-date">${escapeHtml(when)}</span>
+        </div>
+        <strong class="impact-card-title">${file}</strong>
+        ${rows ? `<span class="impact-card-meta">${rows}</span>` : ''}
+        <span class="impact-card-goals">${goals}</span>
+        <span class="impact-card-action">View report →</span>
+      </button>
+    `;
+  }
+
+  function bindCardClicks() {
+    const grid = impactEl('impact-cards-grid');
+    if (!grid) return;
+
+    grid.querySelectorAll('[data-report-id]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-report-id');
+        if (id) openReportDetail(id);
+      });
+    });
+  }
+
+  function renderImpactPagination(pagination) {
+    const nav = impactEl('impact-pagination');
+    if (!nav || !pagination) {
+      if (nav) nav.hidden = true;
+      return;
+    }
+
+    const totalPages = Number(pagination.total_pages || 1);
+    const page = Number(pagination.page || 1);
+    impactPage = page;
+
+    if (totalPages <= 1) {
+      nav.hidden = true;
+      nav.innerHTML = '';
+      return;
+    }
+
+    nav.hidden = false;
+    const prevDisabled = page <= 1;
+    const nextDisabled = page >= totalPages;
+
+    let pagesHtml = '';
+    for (let i = 1; i <= totalPages; i += 1) {
+      pagesHtml += `<button type="button" class="impact-page-btn${i === page ? ' is-active' : ''}" data-page="${i}" ${i === page ? 'aria-current="page"' : ''}>${i}</button>`;
+    }
+
+    nav.innerHTML = `
+      <button type="button" class="impact-page-btn impact-page-nav" data-page="${page - 1}" ${prevDisabled ? 'disabled' : ''}>Previous</button>
+      <div class="impact-page-numbers">${pagesHtml}</div>
+      <button type="button" class="impact-page-btn impact-page-nav" data-page="${page + 1}" ${nextDisabled ? 'disabled' : ''}>Next</button>
+    `;
+
+    nav.querySelectorAll('[data-page]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const nextPage = Number(btn.getAttribute('data-page'));
+        if (!nextPage || nextPage === page || nextPage < 1 || nextPage > totalPages) return;
+        await loadImpactList(nextPage);
+      });
+    });
+  }
+
+  function renderImpactList(history, pagination) {
+    const empty = impactEl('impact-empty');
+    const listWrap = impactEl('impact-list-wrap');
+    const grid = impactEl('impact-cards-grid');
+    const items = Array.isArray(history) ? history : [];
+
+    window.impactReportHistory = items;
+    window.impactHasSessions = window.impactHasSessions || false;
+
+    if (!items.length && (!pagination || !pagination.total)) {
+      renderImpactEmpty();
+      renderImpactPagination(null);
+      return;
+    }
+
+    if (empty) empty.hidden = true;
+    if (listWrap) listWrap.hidden = false;
+
+    if (grid) {
+      grid.innerHTML = items.map(renderImpactCard).join('');
+      bindCardClicks();
+    }
+
+    renderImpactPagination(pagination);
+  }
+
+  async function loadImpactList(page) {
+    impactPage = Math.max(1, page || 1);
+    const grid = impactEl('impact-cards-grid');
+    if (grid) grid.innerHTML = '<p class="text-muted">Loading reports…</p>';
+
+    try {
+      const data = await fetchImpactOverview(impactPage);
+      window.impactHasSessions = !!data.has_sessions;
+      renderImpactList(data.report_history || [], data.pagination || null);
+      setImpactView('list');
+    } catch (err) {
+      if (grid) grid.innerHTML = '<p class="notice">Could not load impact reports.</p>';
+    }
+  }
+
+  function openCreatePanel() {
+    setImpactView('create');
+    const msgEl = impactEl('impact-form-message');
+    if (msgEl) {
+      msgEl.textContent = '';
+      msgEl.classList.add('hidden-inline');
+    }
+  }
+
+  async function openReportDetail(reportId) {
+    setImpactView('detail');
+    const body = impactEl('impact-report-body');
+    if (body) body.innerHTML = '<p class="text-muted">Loading report…</p>';
+
+    try {
+      const report = await fetchImpactReport(reportId);
+      window.impactHasSessions = Number(report.sessions_count || 0) > 0 || !!report.has_sessions;
+      renderImpactReport(report);
+    } catch (err) {
+      if (body) body.innerHTML = '<p class="notice">Could not load this report.</p>';
+    }
+  }
+
+  function formatChartLabel(point, bucket) {
+    if (point.label) return String(point.label).replace('W', ' wk ');
+    return formatCalendarDate(point.date) || point.date;
   }
 
   function renderTrendChart(trend) {
-    const points = Array.isArray(trend) ? trend.filter((p) => p.headcount !== null && p.headcount !== undefined) : [];
+    const bucket = trend && trend.bucket ? trend.bucket : 'day';
+    const label = trend && trend.label ? trend.label : 'Attendance over time';
+    const trimmed = trend && trend.trimmed;
+    const points = (trend && trend.points ? trend.points : Array.isArray(trend) ? trend : [])
+      .filter((p) => p.headcount !== null && p.headcount !== undefined);
+
     if (!points.length) {
-      return '<p class="text-muted">Add an attendance or headcount column to your CSV to see a trend chart.</p>';
+      return '<p class="text-muted">No numeric attendance column detected, add headcount or group_size to your CSV for a trend chart.</p>';
     }
 
     const max = Math.max(...points.map((p) => Number(p.headcount) || 0), 1);
 
     return `
-      <div class="impact-chart" aria-label="Attendance trend">
-        ${points.map((p) => {
-          const h = Math.max(8, Math.round((Number(p.headcount) / max) * 100));
-          const label = new Date(p.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          return `
-            <div class="impact-chart-bar-wrap" title="${label}: ${p.headcount} people">
-              <div class="impact-chart-bar" style="height:${h}%"></div>
-              <span class="impact-chart-label">${label}</span>
+      <p class="impact-chart-caption">${escapeHtml(label)}${trimmed ? ', showing the most recent 24 periods' : ''}</p>
+      <div class="impact-chart-shell">
+        <div class="impact-chart-grid" aria-label="${escapeHtml(label)}" style="--impact-bars:${points.length}">
+          ${points.map((p) => {
+            const h = Math.max(6, Math.round((Number(p.headcount) / max) * 100));
+            const lab = formatChartLabel(p, bucket);
+            return `
+              <div class="impact-chart-cell" title="${escapeHtml(lab)}: ${p.headcount}">
+                <div class="impact-chart-bar-track">
+                  <div class="impact-chart-bar" style="height:${h}%"></div>
+                </div>
+                <span class="impact-chart-label">${escapeHtml(lab)}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderWarnings(warnings) {
+    if (!Array.isArray(warnings) || !warnings.length) return '';
+    return `
+      <div class="impact-warnings">
+        ${warnings.map((w) => `<p class="impact-warning">${escapeHtml(w)}</p>`).join('')}
+      </div>
+    `;
+  }
+
+  const PIE_COLORS = ['#4f7cff', '#34a853', '#fbbc04', '#ea4335', '#9334e6', '#12b5cb', '#ff6d01', '#5f6368'];
+
+  function buildPieGradient(slices) {
+    let cursor = 0;
+    const stops = slices.map((slice, i) => {
+      const start = cursor;
+      cursor += Number(slice.percent) || 0;
+      return `${PIE_COLORS[i % PIE_COLORS.length]} ${start}% ${cursor}%`;
+    });
+    return `conic-gradient(${stops.join(', ')})`;
+  }
+
+  function renderPieChart(chart, index) {
+    const slices = chart.slices || [];
+    if (!slices.length) return '';
+
+    const gradient = buildPieGradient(slices);
+
+    return `
+      <article class="impact-pie-card">
+        <h4>${escapeHtml(chart.title || 'Breakdown')}</h4>
+        <div class="impact-pie-layout">
+          <div class="impact-pie" style="background:${gradient}" role="img" aria-label="${escapeHtml(chart.title || 'Breakdown chart')}"></div>
+          <ul class="impact-pie-legend">
+            ${slices.map((slice, i) => `
+              <li>
+                <span class="impact-pie-swatch" style="background:${PIE_COLORS[i % PIE_COLORS.length]}"></span>
+                <span class="impact-pie-label">${escapeHtml(slice.label)}</span>
+                <span class="impact-pie-value">${slice.value}, ${slice.percent}%</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+        <p class="impact-pie-total">${chart.total} records</p>
+      </article>
+    `;
+  }
+
+  function renderPieCharts(charts) {
+    if (!Array.isArray(charts) || !charts.length) return '';
+    return `
+      <div class="impact-report-section">
+        <h3>Breakdown charts</h3>
+        <div class="impact-pie-grid">
+          ${charts.map((chart, i) => renderPieChart(chart, i)).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderLlmStatus(report, assessment) {
+    if (report && report.llm_configured === false) {
+      return `<p class="impact-assessment-ai-note">AI analysis is off, add your Claude API key to <strong>secrets.local.php</strong> on the server, then click Analyze again.</p>`;
+    }
+    if (report && report.llm_configured && assessment && assessment.source !== 'claude') {
+      if (assessment.llm_error) {
+        return `<p class="impact-assessment-ai-note impact-assessment-ai-warn">Claude could not run: ${escapeHtml(assessment.llm_error)}</p>`;
+      }
+      return `<p class="impact-assessment-ai-note impact-assessment-ai-warn">This saved report predates AI analysis. Re-run Analyze to refresh with AI.</p>`;
+    }
+    return '';
+  }
+
+  function assessmentBadgeClass(meetsGoals) {
+    switch (meetsGoals) {
+      case 'yes': return 'impact-goal-met';
+      case 'partial': return 'impact-goal-track';
+      case 'no': return 'impact-goal-miss';
+      default: return 'impact-goal-muted';
+    }
+  }
+
+  function renderGoalAssessment(assessment, report) {
+    if (!assessment) return '';
+    const badgeClass = assessmentBadgeClass(assessment.meets_goals);
+    const llmStatus = renderLlmStatus(report, assessment);
+    return `
+      <div class="impact-report-section">
+        <h3>Does this meet your goals?</h3>
+        <div class="impact-assessment-card ${badgeClass}">
+          <span class="impact-goal-badge">${escapeHtml(assessment.meets_goals_label || 'Review needed')}</span>
+          <p class="impact-assessment-headline">${escapeHtml(assessment.headline || '')}</p>
+          <p class="impact-assessment-copy">${escapeHtml(assessment.explanation || '')}</p>
+          ${Array.isArray(assessment.supports) && assessment.supports.length ? `
+            <div class="impact-assessment-supports">
+              <strong>What your data does show:</strong>
+              <ul>${assessment.supports.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
             </div>
-          `;
-        }).join('')}
+          ` : ''}
+          ${assessment.what_you_can_say ? `<p class="impact-assessment-quote"><strong>For funders:</strong> ${escapeHtml(assessment.what_you_can_say)}</p>` : ''}
+          ${llmStatus}
+        </div>
       </div>
     `;
   }
@@ -88,13 +441,28 @@
     const body = impactEl('impact-report-body');
     if (!body) return;
 
+    lastImpactReport = report;
+    const downloadBtn = impactEl('impact-download-btn');
+    if (downloadBtn) downloadBtn.hidden = false;
+
     const summary = report.summary || {};
     const hasSessions = Number(report.sessions_count || 0) > 0;
 
     if (!hasSessions) {
-      body.innerHTML = '<p class="text-muted">Upload a CSV and click Analyze to generate your report.</p>';
+      body.innerHTML = '<p class="text-muted">This report has no session data.</p>';
+      if (downloadBtn) downloadBtn.hidden = true;
       return;
     }
+
+    const rangeLabel = reportDateRangeLabel(report);
+    const uniqueDates = report.unique_dates || summary.unique_dates || '';
+    const dateBlock = rangeLabel ? `
+      <div class="impact-report-section impact-date-block">
+        <h3>Imported data period</h3>
+        <p class="impact-date-range">${escapeHtml(rangeLabel)}</p>
+        ${uniqueDates ? `<p class="dash-metric-hint">${escapeHtml(String(uniqueDates))} unique dates from the uploaded file</p>` : ''}
+      </div>
+    ` : '';
 
     const goalsBlock = (report.goals_text || (report.goal_results && report.goal_results[0]?.label))
       ? `
@@ -105,62 +473,149 @@
       `
       : '';
 
+    const avgLabel = report.detected && report.detected.headcount_column
+      ? `Avg (${report.detected.headcount_column})`
+      : 'Avg value';
+
     body.innerHTML = `
+      ${dateBlock}
+      ${renderWarnings(report.data_warnings)}
       <div class="impact-report-summary">
         <p class="impact-summary-lead">${escapeHtml(summary.paragraph || '')}</p>
         <div class="metric-grid impact-report-metrics">
           <article class="dash-metric">
-            <div class="dash-metric-top"><span class="dash-metric-icon" aria-hidden="true">${icon('calendar', 'icon')}</span><h2>Sessions</h2></div>
+            <div class="dash-metric-top"><span class="dash-metric-icon" aria-hidden="true">${icon('calendar', 'icon')}</span><h2>Records</h2></div>
             <p class="dash-metric-value">${summary.session_count ?? report.sessions_count ?? 0}</p>
+            ${uniqueDates ? `<p class="dash-metric-hint">${escapeHtml(String(uniqueDates))} unique dates</p>` : ''}
           </article>
           <article class="dash-metric">
-            <div class="dash-metric-top"><span class="dash-metric-icon" aria-hidden="true">${icon('users', 'icon')}</span><h2>Avg attendance</h2></div>
-            <p class="dash-metric-value">${summary.avg_headcount ?? '—'}</p>
+            <div class="dash-metric-top"><span class="dash-metric-icon" aria-hidden="true">${icon('users', 'icon')}</span><h2>${escapeHtml(avgLabel)}</h2></div>
+            <p class="dash-metric-value">${summary.avg_headcount ?? 'None'}</p>
           </article>
           <article class="dash-metric">
-            <div class="dash-metric-top"><span class="dash-metric-icon" aria-hidden="true">${icon('chart', 'icon')}</span><h2>Total attendance</h2></div>
-            <p class="dash-metric-value">${summary.total_headcount ?? '—'}</p>
+            <div class="dash-metric-top"><span class="dash-metric-icon" aria-hidden="true">${icon('chart', 'icon')}</span><h2>Total</h2></div>
+            <p class="dash-metric-value">${summary.total_headcount ?? 'None'}</p>
           </article>
         </div>
       </div>
       ${goalsBlock}
+      ${renderGoalAssessment(report.goal_assessment, report)}
+      ${renderPieCharts(report.pie_charts)}
       <div class="impact-report-section">
-        <h3>Attendance over time</h3>
+        <h3>Attendance trend</h3>
         ${renderTrendChart(report.trend)}
       </div>
     `;
   }
 
-  function renderUploadMeta(report) {
-    const meta = impactEl('impact-upload-meta');
-    if (!meta) return;
+  function downloadImpactReport() {
+    const report = lastImpactReport;
+    if (!report) return;
 
-    const upload = report.upload;
-    const detected = report.detected || {};
-    if (!upload) {
-      meta.innerHTML = '';
-      return;
-    }
+    const summary = report.summary || {};
+    const assessment = report.goal_assessment || {};
+    const rangeLabel = reportDateRangeLabel(report);
+    const fileBase = (report.upload && report.upload.original_filename)
+      ? String(report.upload.original_filename).replace(/\.[^.]+$/, '')
+      : 'impact-report';
+    const safeName = fileBase.replace(/[^\w\-]+/g, '-').replace(/-+/g, '-').slice(0, 40) || 'impact-report';
 
-    const uploadedAt = upload.uploaded_at
-      ? new Date(upload.uploaded_at).toLocaleString('en-GB')
-      : '';
+    const pie = Array.isArray(report.pie_charts) ? report.pie_charts : [];
+    const trend = report.trend || {};
+    const points = (trend.points || []).filter((p) => p.headcount !== null && p.headcount !== undefined);
+    const max = Math.max(...points.map((p) => Number(p.headcount) || 0), 1);
+    const warnings = Array.isArray(report.data_warnings) ? report.data_warnings : [];
 
-    meta.innerHTML = `
-      <div class="impact-detected">
-        <p><strong>Last CSV:</strong> ${escapeHtml(upload.original_filename)} (${upload.row_count} sessions)${uploadedAt ? ` · ${uploadedAt}` : ''}</p>
-        ${detected.date_column ? `<p><strong>Date column:</strong> ${escapeHtml(detected.date_column)}</p>` : ''}
-        ${detected.headcount_column ? `<p><strong>Attendance column:</strong> ${escapeHtml(detected.headcount_column)}</p>` : ''}
-      </div>
-    `;
-  }
+    const pieHtml = pie.map((chart) => {
+      const slices = chart.slices || [];
+      return `
+        <section>
+          <h3>${escapeHtml(chart.title || 'Breakdown')}</h3>
+          ${slices.map((s) => `
+            <div class="pie-row">
+              <span>${escapeHtml(s.label)}</span>
+              <div class="pie-track"><div class="pie-fill" style="width:${Math.max(0, Math.min(100, Number(s.percent) || 0))}%"></div></div>
+              <strong>${s.percent}%</strong>
+            </div>
+          `).join('')}
+          <table>
+            <thead><tr><th>Category</th><th>Count</th><th>Share</th></tr></thead>
+            <tbody>
+              ${slices.map((s) => `<tr><td>${escapeHtml(s.label)}</td><td>${s.value}</td><td>${s.percent}%</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </section>
+      `;
+    }).join('');
 
-  function applySavedState(report) {
-    const goalsField = impactEl('impact-goals');
-    if (goalsField && report.goals_text) {
-      goalsField.value = report.goals_text;
-    }
-    renderUploadMeta(report);
+    const barsHtml = points.length ? `
+      <section>
+        <h3>Attendance trend</h3>
+        <p>${escapeHtml(trend.label || 'Attendance over time')}</p>
+        <div class="bars">
+          ${points.map((p) => {
+            const h = Math.max(8, Math.round((Number(p.headcount) / max) * 140));
+            const lab = formatChartLabel(p, trend.bucket);
+            return `<div class="bar-col"><div class="bar" style="height:${h}px"></div><span>${escapeHtml(lab)}</span><strong>${p.headcount}</strong></div>`;
+          }).join('')}
+        </div>
+      </section>
+    ` : '';
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PishNest impact report</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:32px;max-width:960px}
+  h1,h2,h3{margin:0 0 8px}
+  .muted{color:#555}
+  .metrics{display:flex;gap:16px;flex-wrap:wrap;margin:16px 0}
+  .metric{border:1px solid #ddd;border-radius:10px;padding:12px 16px;min-width:140px}
+  .metric strong{display:block;font-size:28px}
+  table{border-collapse:collapse;width:100%;margin:12px 0}
+  th,td{border:1px solid #ddd;padding:8px;text-align:left}
+  .pie-row{display:grid;grid-template-columns:minmax(80px,1.2fr) minmax(80px,2fr) auto;gap:8px;align-items:center;margin:6px 0}
+  .pie-track{height:10px;background:#eee;border-radius:99px;overflow:hidden}
+  .pie-fill{height:100%;background:#1f68eb}
+  .bars{display:flex;gap:8px;align-items:flex-end;overflow-x:auto;min-height:180px;padding-top:12px}
+  .bar-col{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:42px;font-size:11px}
+  .bar{width:22px;background:#1f68eb;border-radius:4px 4px 0 0}
+  .quote{background:#f6f7fb;padding:12px;border-radius:8px}
+</style>
+</head>
+<body>
+  <p class="muted">PishNest impact report</p>
+  <h1>${escapeHtml((report.upload && report.upload.original_filename) || 'Session data')}</h1>
+  <p class="muted">Imported data period: ${escapeHtml(rangeLabel || 'Not available')}</p>
+  <section>
+    <h2>Summary</h2>
+    <p>${escapeHtml(summary.paragraph || '')}</p>
+    <div class="metrics">
+      <div class="metric"><span>Records</span><strong>${summary.session_count ?? report.sessions_count ?? 0}</strong></div>
+      <div class="metric"><span>Average</span><strong>${summary.avg_headcount ?? 'None'}</strong></div>
+      <div class="metric"><span>Total</span><strong>${summary.total_headcount ?? 'None'}</strong></div>
+      <div class="metric"><span>Unique dates</span><strong>${report.unique_dates ?? summary.unique_dates ?? 'None'}</strong></div>
+    </div>
+  </section>
+  ${report.goals_text ? `<section><h2>Impact goals</h2><p>${escapeHtml(report.goals_text).replace(/\n/g, '<br>')}</p></section>` : ''}
+  ${assessment.headline ? `<section><h2>Goal assessment</h2><p><strong>${escapeHtml(assessment.meets_goals_label || '')}</strong> ${escapeHtml(assessment.headline || '')}</p><p>${escapeHtml(assessment.explanation || '')}</p>${assessment.what_you_can_say ? `<p class="quote">${escapeHtml(assessment.what_you_can_say)}</p>` : ''}</section>` : ''}
+  ${warnings.length ? `<section><h2>Notes</h2>${warnings.map((w) => `<p>${escapeHtml(w)}</p>`).join('')}</section>` : ''}
+  ${pieHtml}
+  ${barsHtml}
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pishnest-${safeName}-impact-report.html`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
   function bindImpactForm() {
@@ -207,6 +662,20 @@
       dropIcon.innerHTML = icon('chart', 'icon');
     }
 
+    ['impact-create-empty-btn', 'impact-create-list-btn'].forEach((id) => {
+      const btn = impactEl(id);
+      if (btn) btn.addEventListener('click', openCreatePanel);
+    });
+
+    const backList = impactEl('impact-back-to-list');
+    if (backList) backList.addEventListener('click', () => loadImpactList(impactPage));
+
+    const backDetail = impactEl('impact-back-from-detail');
+    if (backDetail) backDetail.addEventListener('click', () => loadImpactList(impactPage));
+
+    const downloadBtn = impactEl('impact-download-btn');
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadImpactReport);
+
     if (!form) return;
 
     form.addEventListener('submit', async (e) => {
@@ -220,8 +689,8 @@
         return;
       }
 
-      if (!file && !(window.impactHasSessions)) {
-        showMessage(msgEl, 'Choose a CSV file with your session data.', true);
+      if (!file && !window.impactHasSessions) {
+        showMessage(msgEl, 'Choose a CSV, Excel, or Word file with your session data.', true);
         return;
       }
 
@@ -237,10 +706,13 @@
 
       try {
         const report = await postImpactFormData(formData);
-        window.impactHasSessions = Number(report.sessions_count || 0) > 0;
-        applySavedState(report);
-        renderImpactReport(report);
-        showMessage(msgEl, report.upload_message || 'Impact report generated.', false);
+        window.impactHasSessions = true;
+        impactPage = 1;
+        if (report.report_id) {
+          setImpactView('detail');
+          renderImpactReport(report);
+        }
+        showMessage(msgEl, report.upload_message || 'Impact report saved.', false);
         if (file && fileNameEl) fileNameEl.textContent = file.name;
       } catch (err) {
         showMessage(msgEl, err.message || 'Could not generate report.', true);
@@ -257,19 +729,6 @@
     if (!document.getElementById('section-impact')) return;
 
     bindImpactForm();
-
-    try {
-      const report = await fetchImpactReport();
-      window.impactHasSessions = Number(report.sessions_count || 0) > 0;
-      applySavedState(report);
-      if (window.impactHasSessions && report.goals_text) {
-        renderImpactReport(report);
-      }
-    } catch (err) {
-      const body = impactEl('impact-report-body');
-      if (body) {
-        body.innerHTML = '<p class="notice">Could not load impact data. Make sure impact.php is on your backend.</p>';
-      }
-    }
+    await loadImpactList(1);
   };
 })();
