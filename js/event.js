@@ -28,7 +28,7 @@ function formatListDate(dateStr) {
 }
 
 function renderEventList(events) {
-  document.title = 'Events — Eventorg';
+  document.title = 'Events, PishNest';
   document.getElementById('breadcrumb-title').textContent = 'Events';
   document.getElementById('draft-banner-slot').innerHTML = '';
 
@@ -104,7 +104,7 @@ function renderDraftBanner(ev) {
   return `
     <div class="draft-banner">
       <div class="inner">
-        <span><strong>${label} — only visible to you.</strong> This is how your event will look once published.</span>
+        <span><strong>${label}, only visible to you.</strong> This is how your event will look once published.</span>
         <div class="actions">
           <a href="organise.html?edit=${ev.id}">Edit</a>
         </div>
@@ -113,14 +113,14 @@ function renderDraftBanner(ev) {
 }
 
 function renderEvent(ev) {
-  document.title = `${ev.title} — Eventorg`;
+  document.title = `${ev.title}, PishNest`;
   document.getElementById('breadcrumb-title').textContent = ev.title;
   document.getElementById('draft-banner-slot').innerHTML = renderDraftBanner(ev);
 
   const start = formatDate(ev.start_datetime);
   const end = ev.end_datetime ? formatDate(ev.end_datetime) : null;
 
-  // Ownership is checked against THIS event's organiser_id specifically —
+  // Ownership is checked against THIS event's organiser_id specifically -
   // not just "is this user an organiser at all". The previous version
   // checked role only, which meant Organiser B would see a "Manage / Edit"
   // link and a "You (Organiser)" badge on Organiser A's event, even though
@@ -165,7 +165,7 @@ function renderEvent(ev) {
           <div class="stock">Sold out</div>
         </div>
         <div class="qty-control">
-          <button class="qty-btn minus" disabled aria-label="Decrease quantity">−</button>
+          <button class="qty-btn minus" disabled aria-label="Decrease quantity"></button>
           <span class="qty-value">0</span>
           <button class="qty-btn plus" disabled aria-label="Increase quantity">+</button>
         </div>
@@ -188,7 +188,7 @@ function renderEvent(ev) {
           <div class="stock">${soldOut ? 'Sold out' : remaining <= 10 ? `Only ${remaining} left` : 'Available'}</div>
         </div>
         <div class="qty-control">
-          <button class="qty-btn minus" ${soldOut ? 'disabled' : ''} aria-label="Decrease quantity">−</button>
+          <button class="qty-btn minus" ${soldOut ? 'disabled' : ''} aria-label="Decrease quantity"></button>
           <span class="qty-value">0</span>
           <button class="qty-btn plus" ${soldOut ? 'disabled' : ''} aria-label="Increase quantity">+</button>
         </div>
@@ -217,7 +217,7 @@ function renderEvent(ev) {
             </div>
             <div class="meta-item">
               <div class="meta-icon">${icon('clock', 'icon')}</div>
-              <div><div class="label">Time</div><div class="value">${start.time}${end ? ' – ' + end.time : ''}</div></div>
+              <div><div class="label">Time</div><div class="value">${start.time}${end ? ' to ' + end.time : ''}</div></div>
             </div>
             <div class="meta-item">
               <div class="meta-icon">${icon('mapPin', 'icon')}</div>
@@ -258,7 +258,8 @@ function renderEvent(ev) {
         <div class="summary-row total"><span>Total</span><span id="summary-total">£0.00</span></div>
 
         <button class="checkout-btn" id="checkout-btn" disabled>${checkoutLabel}</button>
-        <div class="low-stock-note hidden-inline" id="low-stock-note">Almost sold out — grab yours before they're gone.</div>
+        ${ticketsUnavailable ? '' : '<p class="ticket-guest-note">No account needed, you can book with just your name and email.</p>'}
+        <div class="low-stock-note hidden-inline" id="low-stock-note">Almost sold out, grab yours before they're gone.</div>
       </div>
     </div>
   `;
@@ -298,11 +299,6 @@ function attachTicketHandlers(eventId) {
 
       if (items.length === 0) return;
 
-      if (!getCurrentUser()) {
-        window.location.href = `login.html?next=${encodeURIComponent('event.html?id=' + eventId)}`;
-        return;
-      }
-
       sessionStorage.setItem('checkout_event_id', eventId);
       sessionStorage.setItem('checkout_items', JSON.stringify(items));
       window.location.href = 'checkout.html';
@@ -319,14 +315,14 @@ function updateSummary() {
 
   const btn = document.getElementById('checkout-btn');
   btn.disabled = count === 0;
-  btn.textContent = count === 0 ? 'Select tickets to continue' : `Continue — ${count} ticket${count > 1 ? 's' : ''}`;
+  btn.textContent = count === 0 ? 'Select tickets to continue' : `Continue, ${count} ticket${count > 1 ? 's' : ''}`;
 }
 
 async function init() {
   await syncHeaderAuthUI(getCurrentUser());
 
   if (!eventId) {
-    const listData = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/events.php`);
+    const listData = await fetchJSON(`https://pishnest.co.uk/backend/events.php`);
     const events = (listData && listData.events)
       || (listData && listData.data)
       || (Array.isArray(listData) ? listData : []);
@@ -352,7 +348,7 @@ async function init() {
     window.location.href = `event.html?id=${encodeURIComponent(selectedEventId)}`;
   });
 
-  const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/event.php?id=${encodeURIComponent(eventId)}`);
+  const data = await fetchJSON(`https://pishnest.co.uk/backend/event.php?id=${encodeURIComponent(eventId)}`);
   const eventData = (data && data.event)
     || (data && data.data)
     || ((data && data.success && data.id) ? data : null);

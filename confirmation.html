@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking confirmed — Eventorg</title>
+    <title>Booking confirmed, PishNest</title>
     <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/motion.css">
 </head>
@@ -11,16 +11,10 @@
 
     <header class="site-header">
   <div class="nav-inner">
-    <a class="logo" href="index.html">
-      <span class="logo-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
-      </span>
-      Eventorg
-    </a>
+    <a class="logo" href="index.html" aria-label="PishNest"><img src="assets/logo.jpeg" alt="" class="logo-img" aria-hidden="true"><span class="logo-wordmark">PishNest</span></a>
     <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
     <nav class="nav-links" aria-label="Primary">
       <a href="discover.html?audience=kids">Kids</a>
-      <a href="discover.html?audience=general">General</a>
       <a href="categories.html">Categories</a>
       <a href="organise.html" id="organise-link">For organisers</a>
       <a href="my-bookings.html">Bookings</a>
@@ -35,10 +29,10 @@
     <main class="page-container-narrow confirmation-shell">
         <div class="confirmation-card text-center stack-md">
         <h1>Booking confirmed</h1>
-        <p id="confirmation-detail">Thank you — your order has been confirmed.</p>
-        <div class="inline-actions">
-            <a href="dashboard.html" class="btn btn-primary">Go to dashboard</a>
-            <a href="index.html" class="btn btn-ghost">Browse more events</a>
+        <p id="confirmation-detail">Thank you, your order has been confirmed.</p>
+        <div class="inline-actions" id="confirmation-actions">
+            <a href="discover.html?audience=kids" class="btn btn-primary">Browse more activities</a>
+            <a href="index.html" class="btn btn-ghost">Back to home</a>
         </div>
         </div>
     </main>
@@ -46,26 +40,21 @@
     <footer class="site-footer">
   <div class="footer-grid">
     <div class="footer-brand">
-      <a class="logo" href="index.html">
-        <span class="logo-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
-      </span>
-        Eventorg
-      </a>
-      <p>Connecting activity organisers and families — with marketplace-level insight no single booking tool can generate alone.</p>
+      <a class="logo" href="index.html" aria-label="PishNest"><img src="assets/logo.jpeg" alt="" class="logo-img" aria-hidden="true"><span class="logo-wordmark">PishNest</span></a>
+      <p>Connecting Essex activity organisers with families looking for children’s events nearby.</p>
     </div>
     <div class="footer-col">
       <h3>Discover</h3>
       <a href="discover.html?audience=kids">Kids &amp; families</a>
-      <a href="discover.html?audience=general">General</a>
       <a href="categories.html">Categories</a>
-      <a href="discover.html">All activities</a>
+      <a href="discover.html?audience=kids">Essex activities</a>
     </div>
     <div class="footer-col">
       <h3>Organisers</h3>
       <a href="organise.html">Create an activity</a>
       <a href="dashboard.html">Dashboard</a>
       <a href="organiser-sales.html">Sales</a>
+      <a href="pricing.html">Pricing</a>
       <a href="become-organiser.html">Become an organiser</a>
     </div>
     <div class="footer-col">
@@ -77,8 +66,8 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 Eventorg</span>
-    <span>Pilot city: Colchester</span>
+    <span>© 2026 PishNest</span>
+    <span>Launch region: Essex</span>
   </div>
 </footer>
 
@@ -87,9 +76,28 @@
     <script>
         const orderId = sessionStorage.getItem('last_order_id');
         const total = sessionStorage.getItem('last_order_total');
+        const guest = sessionStorage.getItem('last_order_guest') === '1';
+        const email = sessionStorage.getItem('last_order_email') || '';
+        const detail = document.getElementById('confirmation-detail');
+        const actions = document.getElementById('confirmation-actions');
+
         if (orderId) {
-            document.getElementById('confirmation-detail').textContent =
-                `Order #${orderId} confirmed — total £${Number(total).toFixed(2)}. A summary would normally be emailed to you here.`;
+            detail.textContent = `Order #${orderId} confirmed, total £${Number(total).toFixed(2)}. A summary would normally be emailed to you here.`;
+        }
+
+        if (guest) {
+            if (email) {
+                detail.textContent += ` We used ${email} for this booking.`;
+            }
+            actions.innerHTML = `
+                <a href="register.html" class="btn btn-primary">Optional: create an account</a>
+                <a href="discover.html?audience=kids" class="btn btn-ghost">Browse more activities</a>
+            `;
+        } else if (localStorage.getItem('nearby_current_user')) {
+            actions.innerHTML = `
+                <a href="dashboard.html" class="btn btn-primary">View your bookings</a>
+                <a href="discover.html?audience=kids" class="btn btn-ghost">Browse more activities</a>
+            `;
         }
     </script>
 </body>

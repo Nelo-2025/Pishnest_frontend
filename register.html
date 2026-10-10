@@ -11,16 +11,10 @@
 
             <header class="site-header">
   <div class="nav-inner">
-    <a class="logo" href="index.html">
-      <span class="logo-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
-      </span>
-      Eventorg
-    </a>
+    <a class="logo" href="index.html" aria-label="PishNest"><img src="assets/logo.jpeg" alt="" class="logo-img" aria-hidden="true"><span class="logo-wordmark">PishNest</span></a>
     <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
     <nav class="nav-links" aria-label="Primary">
       <a href="discover.html?audience=kids">Kids</a>
-      <a href="discover.html?audience=general">General</a>
       <a href="categories.html">Categories</a>
       <a href="organise.html" id="organise-link">For organisers</a>
       <a href="my-bookings.html">Bookings</a>
@@ -34,30 +28,41 @@
 
             <main class="auth-shell">
                 <h1>Create Account</h1>
-                <p>Sign up as a family or attendee to discover and book activities.</p>
+                <p>Optional for booking, sign up if you want to manage tickets later. We will email a 6 digit code to verify your address. Families can also check out as a guest.</p>
 
                 <form id="register-form" novalidate>
                     <input type="hidden" id="role" name="role" value="attendee">
 
-                    <label for="name">Full Name</label>
-                    <input type="text" id="name" name="name" autocomplete="name" required>
+                    <div id="register-details">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" autocomplete="name" required>
 
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" autocomplete="email" required>
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" autocomplete="email" required>
 
-                    <label for="password">Password</label>
-                    <div class="password-field">
-                        <input type="password" id="password" name="password" autocomplete="new-password" required>
-                        <button type="button" class="password-toggle" data-toggle-password="password" aria-label="Show password"></button>
+                        <label for="password">Password</label>
+                        <div class="password-field">
+                            <input type="password" id="password" name="password" autocomplete="new-password" required>
+                            <button type="button" class="password-toggle" data-toggle-password="password" aria-label="Show password"></button>
+                        </div>
+
+                        <label for="confirm-password">Confirm Password</label>
+                        <div class="password-field">
+                            <input type="password" id="confirm-password" name="confirm-password" autocomplete="new-password" required>
+                            <button type="button" class="password-toggle" data-toggle-password="confirm-password" aria-label="Show password"></button>
+                        </div>
+
+                        <button type="submit" id="register-submit-btn">Sign up</button>
                     </div>
 
-                    <label for="confirm-password">Confirm Password</label>
-                    <div class="password-field">
-                        <input type="password" id="confirm-password" name="confirm-password" autocomplete="new-password" required>
-                        <button type="button" class="password-toggle" data-toggle-password="confirm-password" aria-label="Show password"></button>
+                    <div id="register-otp" class="hidden">
+                        <p id="otp-lead">Enter the 6 digit code we sent to your email.</p>
+                        <label for="verify-code">Verification code</label>
+                        <input type="text" id="verify-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="\d{6}" placeholder="000000">
+                        <button type="submit" id="otp-submit-btn">Verify and continue</button>
+                        <button type="button" class="btn" id="resend-otp-btn">Resend code</button>
                     </div>
 
-                    <button type="submit">Sign up</button>
                     <div id="register-message" class="notice hidden" role="status"></div>
                 </form>
 
@@ -70,26 +75,21 @@
             <footer class="site-footer">
   <div class="footer-grid">
     <div class="footer-brand">
-      <a class="logo" href="index.html">
-        <span class="logo-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
-      </span>
-        Eventorg
-      </a>
-      <p>Connecting activity organisers and families — with marketplace-level insight no single booking tool can generate alone.</p>
+      <a class="logo" href="index.html" aria-label="PishNest"><img src="assets/logo.jpeg" alt="" class="logo-img" aria-hidden="true"><span class="logo-wordmark">PishNest</span></a>
+      <p>Connecting Essex activity organisers with families looking for children’s events nearby.</p>
     </div>
     <div class="footer-col">
       <h3>Discover</h3>
       <a href="discover.html?audience=kids">Kids &amp; families</a>
-      <a href="discover.html?audience=general">General</a>
       <a href="categories.html">Categories</a>
-      <a href="discover.html">All activities</a>
+      <a href="discover.html?audience=kids">Essex activities</a>
     </div>
     <div class="footer-col">
       <h3>Organisers</h3>
       <a href="organise.html">Create an activity</a>
       <a href="dashboard.html">Dashboard</a>
       <a href="organiser-sales.html">Sales</a>
+      <a href="pricing.html">Pricing</a>
       <a href="become-organiser.html">Become an organiser</a>
     </div>
     <div class="footer-col">
@@ -101,8 +101,8 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 Eventorg</span>
-    <span>Pilot city: Colchester</span>
+    <span>© 2026 PishNest</span>
+    <span>Launch region: Essex</span>
   </div>
 </footer>
 

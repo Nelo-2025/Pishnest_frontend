@@ -15,17 +15,29 @@ function getPostLoginRedirect() {
   const next = params.get('next');
   if (!next) return 'dashboard.html';
 
-  // Prevent external/open redirects — only allow known app pages.
+  // Prevent external/open redirects, only allow known app pages.
   if (next.includes('://') || next.startsWith('//')) return 'dashboard.html';
 
   const [pathOnly] = next.split('?');
   const allowedPaths = new Set([
     'dashboard.html', 'organise.html', 'index.html', 'browse.html', 'discover.html',
     'categories.html', 'event.html', 'checkout.html', 'my-bookings.html',
-    'become-organiser.html', 'organiser-sales.html'
+    'become-organiser.html', 'organiser-sales.html', 'confirmation.html'
   ]);
   return allowedPaths.has(pathOnly) ? next : 'dashboard.html';
 }
+
+(function updateLoginLead() {
+  const lead = document.getElementById('login-lead');
+  if (!lead) return;
+  const params = new URLSearchParams(window.location.search);
+  const next = params.get('next') || '';
+  if (next.includes('checkout.html')) {
+    lead.textContent = 'Log in to finish this booking. You can also go back and book as a guest with just your name and email.';
+  } else if (next.includes('my-bookings.html')) {
+    lead.textContent = 'Log in to view and manage your bookings.';
+  }
+})();
 
 function getDefaultRoleRedirect(user) {
   const role = normalizeRole(user && user.role);
@@ -50,15 +62,25 @@ if (loginForm) {
     }
 
     // NOTE: this used to also call get-user.php right after login to fetch
-    // the user's role — that endpoint let anyone look up ANY user's name
+    // the user's role, that endpoint let anyone look up ANY user's name
     // and role by email, with no auth check at all. login.php already
     // returns the full user object on success, so that second call has
     // been removed entirely; it was both insecure and unnecessary.
-    const data = await fetchJSON(`https://darkgoldenrod-reindeer-637131.hostingersite.com/backend/login.php`, {
+    const data = await fetchJSON(`https://pishnest.co.uk/backend/login.php`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ email, password })
     });
+
+    if (data && data.needs_verification) {
+      sessionStorage.setItem('pending_verify_email', email);
+      const params = new URLSearchParams({ email });
+      const next = new URLSearchParams(window.location.search).get('next');
+      if (next) params.set('next', next);
+      showMessage('login-message', data.message || 'Please verify your email before logging in.', true);
+      window.location.href = `verify-email.html?${params.toString()}`;
+      return;
+    }
 
     if (data && data.success && data.user) {
       if (data.session_token) setSessionToken(data.session_token);

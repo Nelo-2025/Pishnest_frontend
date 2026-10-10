@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — Eventorg</title>
+  <title>Dashboard, PishNest</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/motion.css">
 </head>
@@ -12,7 +12,7 @@
 <div id="dash-boot" class="dash-boot" aria-busy="true" aria-live="polite">
   <div class="dash-boot-shell">
     <aside class="dash-boot-sidebar">
-      <div class="dash-skel dash-skel-logo"></div>
+      <div class="dash-skel dash-skel-logo"><img src="assets/logo.jpeg" alt="" class="logo-img" aria-hidden="true"><span class="logo-wordmark">PishNest</span></div>
       <div class="dash-skel dash-skel-user"></div>
       <div class="dash-skel dash-skel-nav"></div>
       <div class="dash-skel dash-skel-nav"></div>
@@ -37,12 +37,7 @@
 
 <div id="dash-gate" class="dash-gate" hidden>
   <div class="dash-gate-card">
-    <a class="logo dash-gate-logo" href="index.html">
-      <span class="logo-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
-      </span>
-      Eventorg
-    </a>
+    <a class="logo dash-gate-logo" href="index.html" aria-label="PishNest"><img src="assets/logo.jpeg" alt="" class="logo-img" aria-hidden="true"><span class="logo-wordmark">PishNest</span></a>
     <h1>Your dashboard</h1>
     <p>Sign in to manage bookings, list activities, and track organiser performance.</p>
     <div class="button-row">
@@ -55,18 +50,13 @@
 <div id="dash-app" class="dash-app" hidden>
   <aside class="dash-sidebar" id="dash-sidebar" aria-label="Dashboard">
     <div class="dash-sidebar-top">
-      <a class="logo dash-sidebar-logo" href="index.html">
-        <span class="logo-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
-        </span>
-        Eventorg
-      </a>
+      <a class="logo dash-sidebar-logo" href="index.html" aria-label="PishNest"><img src="assets/logo.jpeg" alt="" class="logo-img" aria-hidden="true"><span class="logo-wordmark">PishNest</span></a>
 
       <div class="dash-user-card">
         <div class="dash-avatar" id="dash-avatar" aria-hidden="true">?</div>
         <div class="dash-user-copy">
           <strong id="dash-sidebar-name">Account</strong>
-          <span id="dash-sidebar-email" class="dash-user-email">—</span>
+          <span id="dash-sidebar-email" class="dash-user-email">None</span>
           <span class="dash-plan-pill" id="dash-role-pill">attendee</span>
         </div>
       </div>
@@ -84,7 +74,7 @@
     </div>
 
     <div class="dash-sidebar-foot">
-      <a href="discover.html" class="btn btn-primary dash-side-cta" id="dash-side-cta">Browse activities</a>
+      <a href="discover.html?audience=kids" class="btn btn-primary dash-side-cta" id="dash-side-cta">Browse activities</a>
       <button type="button" class="btn btn-ghost dash-logout-btn" id="dash-logout">Log out</button>
     </div>
   </aside>
@@ -96,12 +86,7 @@
       <button type="button" class="dash-menu-btn" id="dash-sidebar-toggle" aria-label="Open menu">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
-      <a class="logo" href="index.html">
-        <span class="logo-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h9a4 4 0 0 1 0 8H9"/><path d="M9 15v4"/><path d="M13 7V4"/></svg>
-        </span>
-        Eventorg
-      </a>
+      <a class="logo" href="index.html" aria-label="PishNest"><img src="assets/logo.jpeg" alt="" class="logo-img" aria-hidden="true"><span class="logo-wordmark">PishNest</span></a>
     </div>
 
     <div class="dash-main-scroll">
@@ -162,27 +147,46 @@
       </section>
 
       <section class="dash-section" id="section-impact" data-section-panel="impact" aria-label="Impact report" hidden>
-        <article class="dash-card impact-form-card">
-          <div class="dash-card-head">
-            <h2>Build your impact report</h2>
+
+        <div id="impact-hub">
+          <div id="impact-empty" class="impact-empty dash-card" hidden>
+            <div class="impact-empty-inner">
+              <span class="impact-empty-icon" aria-hidden="true"></span>
+              <h2>No impact report yet</h2>
+              <p class="text-muted">Upload session data and describe your goals to build a report for funders and stakeholders.</p>
+              <button type="button" class="btn btn-primary btn-lg" id="impact-create-empty-btn">Create impact report</button>
+            </div>
           </div>
-          <p class="dash-card-copy">Upload your session CSV and describe your impact goals. We analyse your data and generate a summary you can use for funders and stakeholders.</p>
+
+          <div id="impact-list-wrap" class="dash-card" hidden>
+            <div class="dash-card-head impact-list-head">
+              <h2>Impact reports</h2>
+              <button type="button" class="btn btn-primary" id="impact-create-list-btn">Create impact report</button>
+            </div>
+            <div id="impact-cards-grid" class="impact-cards-grid" aria-live="polite"></div>
+            <nav id="impact-pagination" class="impact-pagination" aria-label="Impact report pages" hidden></nav>
+          </div>
+        </div>
+
+        <article id="impact-create-panel" class="dash-card impact-form-card" hidden>
+          <button type="button" class="btn btn-ghost impact-back-btn" id="impact-back-to-list">← Back to reports</button>
+          <p class="dash-card-copy">Upload your session data as CSV, Excel, or Word, then describe your impact goals. We analyse your data and generate a summary you can use for funders and stakeholders.</p>
 
           <form id="impact-form" class="impact-form" enctype="multipart/form-data">
             <div class="dash-field">
-              <label for="impact-session-file">Session data (CSV)</label>
+              <label for="impact-session-file">Session data</label>
               <label class="impact-dropzone" for="impact-session-file">
-                <input type="file" id="impact-session-file" name="session_file" accept=".csv,text/csv" hidden>
+                <input type="file" id="impact-session-file" name="session_file" accept=".csv,.tsv,.txt,.xlsx,.xlsm,.docx,text/csv,text/tab-separated-values,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
                 <span class="impact-dropzone-icon" aria-hidden="true"></span>
-                <strong>Choose CSV file</strong>
-                <span class="impact-dropzone-hint">or drag a file here · Excel users: Save As → CSV</span>
+                <strong>Choose a file</strong>
+                <span class="impact-dropzone-hint">CSV, Excel (.xlsx), or Word (.docx)</span>
                 <span class="impact-file-name" id="impact-file-name">No file selected</span>
               </label>
             </div>
 
             <div class="dash-field">
               <label for="impact-goals">Your impact goals</label>
-              <textarea id="impact-goals" name="goals" rows="6" maxlength="2000" placeholder="Describe what you wanted to achieve — e.g. grow weekly attendance, reach more families in the area, run more outdoor sessions, build a case for grant funding…" required></textarea>
+              <textarea id="impact-goals" name="goals" rows="6" maxlength="2000" placeholder="Describe what you wanted to achieve, e.g. grow weekly attendance, reach more families in the area, run more outdoor sessions, build a case for grant funding…" required></textarea>
             </div>
 
             <div class="button-row">
@@ -194,30 +198,26 @@
           <div id="impact-upload-meta" class="impact-upload-meta"></div>
         </article>
 
-        <article class="dash-card impact-report-card">
-          <div class="dash-card-head">
-            <h2>Impact report</h2>
+        <article id="impact-detail-panel" class="dash-card impact-report-card" hidden>
+          <div class="impact-detail-toolbar">
+            <button type="button" class="btn btn-ghost impact-back-btn" id="impact-back-from-detail">← Back to reports</button>
+            <button type="button" class="btn btn-primary" id="impact-download-btn" hidden>Download Report</button>
           </div>
-          <div id="impact-report-body"><p class="text-muted">Upload a CSV, write your goals, then click <strong>Analyze &amp; generate report</strong>.</p></div>
+          <div id="impact-report-body" class="impact-report-body"></div>
         </article>
       </section>
 
       <section class="dash-section" id="section-discover" data-section-panel="discover" aria-label="Discover" hidden>
         <div class="dash-discover-grid">
-          <a class="dash-card dash-discover-card" href="discover.html">
+          <a class="dash-card dash-discover-card" href="discover.html?audience=kids">
             <span class="dash-discover-ico" aria-hidden="true" data-discover-icon="search"></span>
-            <strong>All activities</strong>
-            <span>Browse everything happening near you</span>
+            <strong>Essex activities</strong>
+            <span>Kids and family events in our launch region</span>
           </a>
           <a class="dash-card dash-discover-card" href="discover.html?audience=kids">
             <span class="dash-discover-ico" aria-hidden="true" data-discover-icon="users"></span>
             <strong>Kids &amp; families</strong>
-            <span>Family-friendly activities and workshops</span>
-          </a>
-          <a class="dash-card dash-discover-card" href="discover.html?audience=general">
-            <span class="dash-discover-ico" aria-hidden="true" data-discover-icon="calendar"></span>
-            <strong>General</strong>
-            <span>Community events open to everyone</span>
+            <span>Family friendly activities and workshops</span>
           </a>
           <a class="dash-card dash-discover-card" href="categories.html">
             <span class="dash-discover-ico" aria-hidden="true" data-discover-icon="spark"></span>
@@ -237,7 +237,7 @@
               <div class="dash-account-avatar" id="dash-settings-avatar" aria-hidden="true">?</div>
               <div>
                 <strong id="dash-settings-name">Account</strong>
-                <p id="dash-settings-email" class="text-muted">—</p>
+                <p id="dash-settings-email" class="text-muted">None</p>
                 <span class="dash-plan-pill" id="dash-settings-role">attendee</span>
               </div>
             </div>
@@ -251,7 +251,7 @@
             <form id="dashboard-settings-form" class="dash-profile-form">
               <div class="dash-field">
                 <label for="dashboard-display-name">Display name</label>
-                <input type="text" id="dashboard-display-name" maxlength="60" placeholder="How you appear on Eventorg" autocomplete="nickname">
+                <input type="text" id="dashboard-display-name" maxlength="60" placeholder="How you appear on PishNest" autocomplete="nickname">
               </div>
               <div class="dash-field">
                 <label for="dashboard-bio">Bio</label>
@@ -271,7 +271,7 @@
             <div class="dash-card-head">
               <h2>Security</h2>
             </div>
-            <p class="dash-card-copy">Reset your password if you need to update sign-in details.</p>
+            <p class="dash-card-copy">Reset your password if you need to update sign in details.</p>
             <a href="forgot-password.html" class="btn btn-ghost">Reset password</a>
           </article>
         </div>
